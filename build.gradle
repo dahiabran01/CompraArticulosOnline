@@ -1,0 +1,63 @@
+plugins {
+    id 'io.github.jumosqu12.screenplayarchitecture' version '2.0.1'
+    id 'java'
+    id 'net.serenity-bdd.serenity-gradle-plugin' version '4.1.3'
+}
+
+group = 'co.com.equipo.certificacion'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+}
+
+def serenityVersion = '4.1.3'
+
+dependencies {
+    implementation "net.serenity-bdd:serenity-screenplay:${serenityVersion}"
+    implementation "net.serenity-bdd:serenity-screenplay-webdriver:${serenityVersion}"
+    testImplementation "net.serenity-bdd:serenity-cucumber:${serenityVersion}"
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.hamcrest:hamcrest:2.2'
+    testRuntimeOnly 'org.slf4j:slf4j-simple:2.0.5'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+def selectedRunner = providers.gradleProperty('runner').orElse('AutomationExerciseRunner')
+
+tasks.named('test') {
+    useJUnit()
+    filter {
+        includeTestsMatching "*.${selectedRunner.get()}"
+    }
+    System.properties.each { key, value ->
+        if (key.startsWith('cucumber.') || key.startsWith('webdriver.') ||
+                key.startsWith('serenity.') || key == 'demo.delay' || key == 'headless.mode') {
+            systemProperty key, value
+        }
+    }
+    jvmArgs '-Dfile.encoding=UTF-8'
+    outputs.upToDateWhen { false }
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        exceptionFormat = 'full'
+    }
+    if (!Boolean.getBoolean('cucumber.execution.dry-run')) {
+        finalizedBy 'aggregate'
+    }
+}
+
+tasks.named('clean') {
+    delete layout.projectDirectory.dir('target')
+}
+
+serenity {
+    generateOutcomes = true
+}

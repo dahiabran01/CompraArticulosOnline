@@ -1,0 +1,7 @@
+.gradle/
+.gradle-validation/
+build/
+target/
+.idea/
+.vscode/
+*.iml
