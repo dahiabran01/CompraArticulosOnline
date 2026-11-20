@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Automation Exercise con Serenity Screenplay
 
 Proyecto de Calidad de Software 2026-2 para la tienda de práctica [Automation Exercise](https://automationexercise.com/). Incluye 4 features en inglés con 18 escenarios y 19 casos ejecutables. El flujo principal registra un comprador, agrega ropa al carrito, revisa la dirección y el total, paga con datos de prueba y verifica la confirmación del pedido.
@@ -54,3 +55,7 @@ El reporte HTML de Serenity se genera en `target/site/serenity/index.html`. La p
 **Fast** usa esperas de interfaz y deja la pausa solo para la sustentación. **Independent** prepara los datos de cada escenario en una sesión propia. **Repeatable** emplea un correo ficticio único y elimina la cuenta de prueba al finalizar cuando la tienda responde. **Self-validating** comprueba los resultados mediante aserciones. **Timely** vincula el diseño de escenarios a los criterios de aceptación del taller.
 
 La cuenta y la tarjeta usan datos de prueba. Los flujos de referencia están en los [casos oficiales de Automation Exercise](https://automationexercise.com/test_cases).
+=======
+# CompraArticulosOnline
+Taller de Automatización de pruebas con scalffolding of ScreenPlay Architecture. Aplicado al negocio: Compra de Artículos online
+>>>>>>> cec106472dbd1528e4c1a1a1920fbac5199126d7
