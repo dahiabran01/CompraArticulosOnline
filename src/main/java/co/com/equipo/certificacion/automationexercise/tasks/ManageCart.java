@@ -1,5 +1,6 @@
 package co.com.equipo.certificacion.automationexercise.tasks;
 
+import co.com.equipo.certificacion.automationexercise.utils.WaitTimeouts;
 import net.serenitybdd.screenplay.Performable;
 import net.serenitybdd.screenplay.Task;
 import net.serenitybdd.screenplay.actions.Enter;
@@ -30,6 +31,6 @@ public final class ManageCart {
 
     public static Performable remove(String product) {
         return Task.where("{0} removes " + product + " from the cart",
-                on(REMOVE.of(product)), WaitUntil.the(ROW_FOR.of(product), isNotVisible()).forNoMoreThan(10).seconds());
+                on(REMOVE.of(product)), WaitUntil.the(ROW_FOR.of(product), isNotVisible()).forNoMoreThan(WaitTimeouts.seconds()).seconds());
     }
 }

@@ -7,6 +7,7 @@ import co.com.equipo.certificacion.automationexercise.userinterfaces.AccountPage
 import co.com.equipo.certificacion.automationexercise.userinterfaces.CartPage;
 import co.com.equipo.certificacion.automationexercise.userinterfaces.CheckoutPage;
 import co.com.equipo.certificacion.automationexercise.userinterfaces.Shop;
+import co.com.equipo.certificacion.automationexercise.utils.WaitTimeouts;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.serenitybdd.screenplay.targets.Target;
@@ -49,7 +50,7 @@ public class CheckoutSteps {
 
     private void verifyRegisteredAddress(Target address) {
         Shopper shopper = registeredAccount();
-        actor().attemptsTo(WaitUntil.the(address, isVisible()).forNoMoreThan(10).seconds());
+        actor().attemptsTo(WaitUntil.the(address, isVisible()).forNoMoreThan(WaitTimeouts.seconds()).seconds());
         actor().should(seeThat(DisplayedText.of(address), allOf(
                 containsString(shopper.displayName()), containsString(shopper.street()),
                 containsString(shopper.city()), containsString(shopper.state()),
@@ -98,7 +99,7 @@ public class CheckoutSteps {
 
     @When("the shopper chooses to continue on the cart")
     public void continueOnCart() {
-        actor().attemptsTo(on(CartPage.CONTINUE_ON_CART), WaitUntil.the(CartPage.REGISTER_OR_LOGIN, isNotVisible()).forNoMoreThan(10).seconds());
+        actor().attemptsTo(on(CartPage.CONTINUE_ON_CART), WaitUntil.the(CartPage.REGISTER_OR_LOGIN, isNotVisible()).forNoMoreThan(WaitTimeouts.seconds()).seconds());
     }
 
     @Then("the checkout prompt closes and the cart remains available")

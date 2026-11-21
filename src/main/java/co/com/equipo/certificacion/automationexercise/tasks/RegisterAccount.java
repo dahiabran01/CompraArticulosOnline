@@ -1,6 +1,7 @@
 package co.com.equipo.certificacion.automationexercise.tasks;
 
 import co.com.equipo.certificacion.automationexercise.models.Shopper;
+import co.com.equipo.certificacion.automationexercise.utils.WaitTimeouts;
 import net.serenitybdd.screenplay.Performable;
 import net.serenitybdd.screenplay.Task;
 import net.serenitybdd.screenplay.actions.Enter;
@@ -24,7 +25,7 @@ public final class RegisterAccount {
     public static Performable forShopper(Shopper shopper) {
         return Task.where("{0} creates a new shopper account",
                 startFor(shopper),
-                WaitUntil.the(PASSWORD, isVisible()).forNoMoreThan(10).seconds(),
+                WaitUntil.the(PASSWORD, isVisible()).forNoMoreThan(WaitTimeouts.seconds()).seconds(),
                 Enter.theValue(shopper.password()).into(PASSWORD),
                 Enter.theValue(shopper.firstName()).into(FIRST_NAME),
                 Enter.theValue(shopper.lastName()).into(LAST_NAME),

@@ -5,6 +5,7 @@ import co.com.equipo.certificacion.automationexercise.tasks.BrowseCatalog;
 import co.com.equipo.certificacion.automationexercise.tasks.StartShopping;
 import co.com.equipo.certificacion.automationexercise.userinterfaces.CatalogPage;
 import co.com.equipo.certificacion.automationexercise.userinterfaces.Shop;
+import co.com.equipo.certificacion.automationexercise.utils.WaitTimeouts;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -27,7 +28,7 @@ public class CatalogSteps {
 
     @When("the shopper searches for {string}")
     public void search(String query) {
-        actor().attemptsTo(BrowseCatalog.searchFor(query), WaitUntil.the(CatalogPage.RESULTS_TITLE, isVisible()).forNoMoreThan(10).seconds());
+        actor().attemptsTo(BrowseCatalog.searchFor(query), WaitUntil.the(CatalogPage.RESULTS_TITLE, isVisible()).forNoMoreThan(WaitTimeouts.seconds()).seconds());
     }
 
     @Then("the search results include {string}")

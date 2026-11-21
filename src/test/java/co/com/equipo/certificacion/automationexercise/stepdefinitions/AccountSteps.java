@@ -8,6 +8,7 @@ import co.com.equipo.certificacion.automationexercise.tasks.StartShopping;
 import co.com.equipo.certificacion.automationexercise.userinterfaces.AccountPage;
 import co.com.equipo.certificacion.automationexercise.userinterfaces.CartPage;
 import co.com.equipo.certificacion.automationexercise.userinterfaces.Shop;
+import co.com.equipo.certificacion.automationexercise.utils.WaitTimeouts;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -36,7 +37,7 @@ public class AccountSteps {
     public void register() {
         Shopper shopper = Shopper.newAccount();
         actor().attemptsTo(RegisterAccount.forShopper(shopper));
-        actor().attemptsTo(WaitUntil.the(AccountPage.CREATED, isVisible()).forNoMoreThan(10).seconds());
+        actor().attemptsTo(WaitUntil.the(AccountPage.CREATED, isVisible()).forNoMoreThan(WaitTimeouts.seconds()).seconds());
         rememberAccount(shopper);
     }
 

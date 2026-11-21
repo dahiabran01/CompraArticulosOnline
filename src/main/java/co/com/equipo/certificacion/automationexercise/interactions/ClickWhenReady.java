@@ -1,6 +1,7 @@
 package co.com.equipo.certificacion.automationexercise.interactions;
 
 import co.com.equipo.certificacion.automationexercise.utils.Narrator;
+import co.com.equipo.certificacion.automationexercise.utils.WaitTimeouts;
 import net.serenitybdd.annotations.Step;
 import net.serenitybdd.screenplay.Actor;
 import net.serenitybdd.screenplay.Interaction;
@@ -27,6 +28,6 @@ public class ClickWhenReady implements Interaction {
     public <T extends Actor> void performAs(T actor) {
         String targetName = target == null ? "elemento" : target.getName();
         Narrator.says(actor, "hace clic en \"" + targetName + "\"");
-        actor.attemptsTo(WaitUntil.the(target, isClickable()).forNoMoreThan(10).seconds(), Click.on(target));
+        actor.attemptsTo(WaitUntil.the(target, isClickable()).forNoMoreThan(WaitTimeouts.seconds()).seconds(), Click.on(target));
     }
 }

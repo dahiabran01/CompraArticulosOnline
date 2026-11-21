@@ -1,6 +1,7 @@
 package co.com.equipo.certificacion.automationexercise.tasks;
 
 import co.com.equipo.certificacion.automationexercise.models.Shopper;
+import co.com.equipo.certificacion.automationexercise.utils.WaitTimeouts;
 import net.serenitybdd.screenplay.Actor;
 import net.serenitybdd.screenplay.Task;
 import net.serenitybdd.screenplay.Tasks;
@@ -30,6 +31,6 @@ public class DeleteTestAccount implements Task {
         if (ACCOUNT.resolveFor(actor).isCurrentlyVisible()) {
             actor.attemptsTo(on(ACCOUNT), SignIn.with(shopper.email(), shopper.password()));
         }
-        actor.attemptsTo(on(DELETE_ACCOUNT), WaitUntil.the(DELETED, isVisible()).forNoMoreThan(10).seconds());
+        actor.attemptsTo(on(DELETE_ACCOUNT), WaitUntil.the(DELETED, isVisible()).forNoMoreThan(WaitTimeouts.seconds()).seconds());
     }
 }

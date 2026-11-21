@@ -6,6 +6,7 @@ import co.com.equipo.certificacion.automationexercise.tasks.StartShopping;
 import co.com.equipo.certificacion.automationexercise.userinterfaces.CartPage;
 import co.com.equipo.certificacion.automationexercise.userinterfaces.CatalogPage;
 import co.com.equipo.certificacion.automationexercise.userinterfaces.Shop;
+import co.com.equipo.certificacion.automationexercise.utils.WaitTimeouts;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -24,14 +25,14 @@ import static org.hamcrest.Matchers.equalTo;
 public class CartSteps {
     @Given("the shopper has an empty cart")
     public void openEmptyCart() {
-        actor().wasAbleTo(StartShopping.at(Shop.CART), WaitUntil.the(CartPage.EMPTY, isVisible()).forNoMoreThan(10).seconds());
+        actor().wasAbleTo(StartShopping.at(Shop.CART), WaitUntil.the(CartPage.EMPTY, isVisible()).forNoMoreThan(WaitTimeouts.seconds()).seconds());
     }
 
     @Given("the shopper has {string} with a quantity of {int} in the cart")
     public void prepareCart(String product, int quantity) {
         openEmptyCart();
         addToCart(product, quantity);
-        actor().wasAbleTo(WaitUntil.the(CartPage.ROW_FOR.of(product), isVisible()).forNoMoreThan(10).seconds());
+        actor().wasAbleTo(WaitUntil.the(CartPage.ROW_FOR.of(product), isVisible()).forNoMoreThan(WaitTimeouts.seconds()).seconds());
     }
 
     @When("the shopper adds {string} with a quantity of {int} and opens the cart")
