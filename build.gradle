@@ -39,7 +39,8 @@ tasks.named('test') {
     }
     System.properties.each { key, value ->
         if (key.startsWith('cucumber.') || key.startsWith('webdriver.') ||
-                key.startsWith('serenity.') || key == 'demo.delay' || key == 'headless.mode') {
+                key.startsWith('serenity.') || key.startsWith('progress.') ||
+                key == 'demo.delay' || key == 'headless.mode') {
             systemProperty key, value
         }
     }
@@ -48,10 +49,31 @@ tasks.named('test') {
     testLogging {
         events 'passed', 'skipped', 'failed'
         exceptionFormat = 'full'
+        showStandardStreams = true
     }
     if (!Boolean.getBoolean('cucumber.execution.dry-run')) {
         finalizedBy 'aggregate'
     }
+}
+
+tasks.register('unitTest', Test) {
+    description = 'Runs pure unit tests without launching a browser.'
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnit()
+    filter {
+        includeTestsMatching '*Test'
+    }
+    jvmArgs '-Dfile.encoding=UTF-8'
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        exceptionFormat = 'full'
+    }
+}
+
+tasks.named('check') {
+    dependsOn 'unitTest'
 }
 
 tasks.named('clean') {
