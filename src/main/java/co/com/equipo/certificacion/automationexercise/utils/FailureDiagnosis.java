@@ -6,6 +6,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Clasifica una excepcion de prueba en una causa probable legible en espanol.
@@ -13,6 +14,7 @@ import java.util.Set;
 public final class FailureDiagnosis {
     private static final int MAX_CAUSE_DEPTH = 10;
     private static final int MAX_DETAIL_LENGTH = 200;
+    private static final Pattern BUSINESS_COMPLAINT_PREFIX = Pattern.compile("^AC\\d+(?:/AC\\d+)*:\\s+.+");
 
     private FailureDiagnosis() {}
 
@@ -37,7 +39,7 @@ public final class FailureDiagnosis {
         String detail = extractDetail(chain);
 
         for (Throwable cause : chain) {
-            if (isShopExpectationError(cause)) {
+            if (isShopExpectationError(cause) || isErrorTallyBusinessRuleAssertion(cause)) {
                 String message = firstNonBlankLine(cause.getMessage());
                 if (message.endsWith(" -")) {
                     message = message.substring(0, message.length() - 2).trim();
@@ -142,6 +144,21 @@ public final class FailureDiagnosis {
         return false;
     }
 
+    /**
+     * En Serenity 4.1.3, ErrorTally.throwSummaryExceptionFrom reemplaza la subclase
+     * personalizada de AssertionError por un AssertionError plano al propagar el
+     * fallo hacia Cucumber/JUnit, conservando el mensaje de orComplainWith.
+     * Reconocer el prefijo AC##: mantiene la categoria REGLA_DE_NEGOCIO en consola
+     * sin acoplar esta utilidad al API interno de Serenity.
+     */
+    private static boolean isErrorTallyBusinessRuleAssertion(Throwable throwable) {
+        if (!(throwable instanceof AssertionError)) {
+            return false;
+        }
+        String firstLine = firstNonBlankLine(throwable.getMessage());
+        return BUSINESS_COMPLAINT_PREFIX.matcher(firstLine).matches();
+    }
+
     private static boolean isElementUnavailableType(String simpleName) {
         return simpleName.contains("Timeout")
                 || simpleName.contains("NoSuchElement")
@@ -210,11 +227,16 @@ public final class FailureDiagnosis {
         if (nonBlankLines.isEmpty()) {
             return "";
         }
-        String first = nonBlankLines.get(0);
-        if (first.startsWith("Expected:") && nonBlankLines.size() > 1 && nonBlankLines.get(1).startsWith("but:")) {
-            return first + " | " + nonBlankLines.get(1);
+        for (int i = 0; i < nonBlankLines.size(); i++) {
+            String line = nonBlankLines.get(i);
+            if (line.startsWith("Expected:")) {
+                if (i + 1 < nonBlankLines.size() && nonBlankLines.get(i + 1).startsWith("but:")) {
+                    return line + " | " + nonBlankLines.get(i + 1);
+                }
+                return line;
+            }
         }
-        return first;
+        return nonBlankLines.get(0);
     }
 
     private static String firstNonBlankLine(String message) {

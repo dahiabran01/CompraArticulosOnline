@@ -252,5 +252,24 @@ public class FailureDiagnosisTest {
         assertThat(diagnosis.probableCause(), is(equalTo(
                 "El sitio respondio, pero el resultado no cumple el criterio de aceptacion: AC11: el total del pedido no coincide")));
     }
+
+    @Test
+    public void classifiesErrorTallyBusinessComplaintAssertionAsBusinessRule() {
+        // Arrange
+        Throwable error = new AssertionError(
+                "AC11/AC14/AC19/AC26: el total del pedido no coincide - \n"
+                        + "Expected: a string equal to \"Rs. 9999\" ignoring case\n"
+                        + "     but: was \"Rs. 1000\"");
+
+        // Act
+        Diagnosis diagnosis = FailureDiagnosis.of(error);
+
+        // Assert
+        assertThat(diagnosis.category(), is(equalTo("REGLA_DE_NEGOCIO")));
+        assertThat(diagnosis.probableCause(), is(equalTo(
+                "El sitio respondio, pero el resultado no cumple el criterio de aceptacion: AC11/AC14/AC19/AC26: el total del pedido no coincide")));
+        assertThat(diagnosis.detail(), is(equalTo(
+                "Expected: a string equal to \"Rs. 9999\" ignoring case | but: was \"Rs. 1000\"")));
+    }
 }
 
