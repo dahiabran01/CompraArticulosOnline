@@ -6,13 +6,6 @@ public final class CartPage {
     private static final String ROW = "//div[@id='cart_info']//tr[starts-with(@id,'product-') and td[@class='cart_description']//a[normalize-space()=\"{0}\"]]";
     public static final Target EMPTY = Target.the("empty cart notice").locatedBy("#empty_cart b");
     public static final Target ROWS = Target.the("cart product rows").locatedBy("#cart_info tr[id^='product-']");
-    public static final Target PRODUCT_NAMES = Target.the("cart products").locatedBy("#cart_info tr[id^='product-'] .cart_description h4 a");
-    public static final Target QUANTITY = Target.the("cart quantity for {0}")
-            .locatedBy(ROW + "//td[@class='cart_quantity']");
-    public static final Target UNIT_PRICE = Target.the("unit price for {0}")
-            .locatedBy(ROW + "//td[@class='cart_price']/p");
-    public static final Target SUBTOTAL = Target.the("subtotal for {0}")
-            .locatedBy(ROW + "//p[contains(@class,'cart_total_price')]");
     public static final Target REMOVE = Target.the("remove {0}").locatedBy(ROW + "//a[contains(@class,'cart_quantity_delete')]");
     public static final Target ROW_FOR = Target.the("cart row for {0}").locatedBy(ROW);
     public static final Target PROCEED = Target.the("Proceed To Checkout").locatedBy(".check_out");

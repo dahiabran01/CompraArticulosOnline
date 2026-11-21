@@ -1,6 +1,8 @@
 package co.com.equipo.certificacion.automationexercise.stepdefinitions;
 
+import co.com.equipo.certificacion.automationexercise.exceptions.AccountStateMismatch;
 import co.com.equipo.certificacion.automationexercise.models.Shopper;
+import co.com.equipo.certificacion.automationexercise.questions.TheShopper;
 import co.com.equipo.certificacion.automationexercise.tasks.DeleteTestAccount;
 import co.com.equipo.certificacion.automationexercise.tasks.RegisterAccount;
 import co.com.equipo.certificacion.automationexercise.tasks.SignIn;
@@ -21,9 +23,9 @@ import static co.com.equipo.certificacion.automationexercise.stepdefinitions.Sho
 import static co.com.equipo.certificacion.automationexercise.stepdefinitions.ShopperSession.registeredAccount;
 import static co.com.equipo.certificacion.automationexercise.stepdefinitions.ShopperSession.rememberAccount;
 import static net.serenitybdd.screenplay.GivenWhenThen.seeThat;
-import static net.serenitybdd.screenplay.matchers.WebElementStateMatchers.isNotVisible;
 import static net.serenitybdd.screenplay.matchers.WebElementStateMatchers.isVisible;
-import static net.serenitybdd.screenplay.questions.WebElementQuestion.the;
+import static org.hamcrest.Matchers.equalToIgnoringCase;
+import static org.hamcrest.Matchers.is;
 
 public class AccountSteps {
     private Shopper deletedAccount;
@@ -43,7 +45,8 @@ public class AccountSteps {
 
     @Then("the shop displays {string}")
     public void verifyRegistration(String heading) {
-        verifyText(AccountPage.CREATED, heading);
+        verifyText(AccountPage.CREATED, heading, AccountStateMismatch.class,
+                "AC01: no se mostro el mensaje esperado tras crear la cuenta");
     }
 
     @When("the shopper continues from the account confirmation")
@@ -53,7 +56,9 @@ public class AccountSteps {
 
     @Then("the header shows the registered shopper's name")
     public void verifyShopperName() {
-        verifyText(Shop.SHOPPER_NAME, registeredAccount().displayName());
+        actor().should(seeThat(TheShopper.signedInName(), equalToIgnoringCase(registeredAccount().displayName()))
+                .orComplainWith(AccountStateMismatch.class,
+                        "AC01/AC03/AC18: el encabezado no muestra el nombre del comprador autenticado"));
     }
 
     @Given("the shopper has just registered and is signed in")
@@ -107,9 +112,15 @@ public class AccountSteps {
 
     @Then("the sign-in page is displayed and the shopper is signed out")
     public void verifySignedOut() {
-        verifyText(AccountPage.LOGIN_TITLE, "Login to your account");
-        actor().should(seeThat(the(Shop.ACCOUNT), isVisible()),
-                seeThat(the(Shop.SHOPPER_NAME), isNotVisible()));
+        verifyText(AccountPage.LOGIN_TITLE, "Login to your account", AccountStateMismatch.class,
+                "AC04/AC15/AC20: no se mostro el formulario de inicio de sesion");
+        actor().should(
+                seeThat(TheShopper.isSignInLinkVisible(), is(true))
+                        .orComplainWith(AccountStateMismatch.class,
+                                "AC04/AC15/AC20: no se mostro el enlace para iniciar sesion"),
+                seeThat(TheShopper.isSignedIn(), is(false))
+                        .orComplainWith(AccountStateMismatch.class,
+                                "AC04/AC15/AC20: el comprador sigue autenticado en el encabezado"));
     }
 
     @When("the shopper deletes the account")
@@ -120,7 +131,8 @@ public class AccountSteps {
 
     @Then("the shop confirms that the account was deleted")
     public void verifyAccountDeletion() {
-        verifyText(AccountPage.DELETED, "Account Deleted!");
+        verifyText(AccountPage.DELETED, "Account Deleted!", AccountStateMismatch.class,
+                "AC16: la tienda no confirmo la eliminacion de la cuenta");
     }
 
     @When("the shopper continues and tries to sign in with the deleted account")
@@ -152,7 +164,8 @@ public class AccountSteps {
 
     @Then("the sign-up form displays the error {string}")
     public void verifySignupError(String message) {
-        verifyText(AccountPage.SIGNUP_ERROR, message);
+        verifyText(AccountPage.SIGNUP_ERROR, message, AccountStateMismatch.class,
+                "AC02: no se mostro el error esperado para correo ya registrado");
     }
 
     @When("the shopper submits the sign-in form with an email and no password")
@@ -163,11 +176,14 @@ public class AccountSteps {
     @Then("the password is required and the shopper remains signed out")
     public void verifyMissingPassword() {
         verifySignedOut();
-        actor().should(seeThat(the(AccountPage.MISSING_LOGIN_PASSWORD), isVisible()));
+        actor().should(seeThat(TheShopper.isMissingSignInPassword(), is(true))
+                .orComplainWith(AccountStateMismatch.class,
+                        "AC20: el campo de contrasena no se marco como obligatorio e invalido"));
     }
 
     @Then("the sign-in form displays {string}")
     public void verifySignInMessage(String message) {
-        verifyText(AccountPage.LOGIN_ERROR, message);
+        verifyText(AccountPage.LOGIN_ERROR, message, AccountStateMismatch.class,
+                "AC04/AC16: no se mostro el mensaje esperado de credenciales invalidas");
     }
 }
