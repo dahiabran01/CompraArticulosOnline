@@ -67,7 +67,8 @@ public final class ExecutionProgressReporter implements ConcurrentEventListener 
         try {
             action.run();
         } catch (RuntimeException error) {
-            System.err.println("[ExecutionProgressReporter] Error en " + eventName + ": " + error.getMessage());
+            System.err.println("[ExecutionProgressReporter] Error en "
+                    + eventName + " (" + error.getClass().getSimpleName() + "): " + error.getMessage());
         }
     }
 
@@ -193,9 +194,11 @@ public final class ExecutionProgressReporter implements ConcurrentEventListener 
         long minutes = totalSeconds / 60;
         long seconds = totalSeconds % 60;
 
+        boolean isDryRun = ConsoleOutput.enabled("cucumber.execution.dry-run", false);
+        String passedLabel = isDryRun ? "%d validados (dry-run)" : "%d pasaron";
         String summary = String.format(
                 Locale.US,
-                "==== Resumen: %d pasaron | %d fallaron | %d omitidos | %d min %d s ====",
+                "==== Resumen: " + passedLabel + " | %d fallaron | %d omitidos | %d min %d s ====",
                 passedCount.get(),
                 failedCount.get(),
                 skippedCount.get(),

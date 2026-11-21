@@ -147,6 +147,11 @@ public final class FailureDiagnosis {
                 || simpleName.contains("ElementNotInteractable");
     }
 
+    /**
+     * Reconoce los AssertionError que Serenity 4.1.3 emite cuando falla WaitUntil.the(target, matcher)
+     * mediante EventualConsequence y WebElementQuestion, para clasificarlos como ELEMENTO_NO_DISPONIBLE
+     * en lugar de VALOR_INESPERADO.
+     */
     private static boolean isElementUnavailableAssertion(Throwable throwable) {
         if (!(throwable instanceof AssertionError)) {
             return false;
@@ -180,12 +185,33 @@ public final class FailureDiagnosis {
 
     private static String extractDetail(List<Throwable> chain) {
         for (int index = chain.size() - 1; index >= 0; index--) {
-            String firstLine = firstNonBlankLine(chain.get(index).getMessage());
-            if (!firstLine.isEmpty()) {
-                return truncate(firstLine, MAX_DETAIL_LENGTH);
+            String summary = summarizeMessage(chain.get(index).getMessage());
+            if (!summary.isEmpty()) {
+                return truncate(summary, MAX_DETAIL_LENGTH);
             }
         }
         return truncate(chain.get(chain.size() - 1).getClass().getSimpleName(), MAX_DETAIL_LENGTH);
+    }
+
+    private static String summarizeMessage(String message) {
+        if (message == null || message.isBlank()) {
+            return "";
+        }
+        List<String> nonBlankLines = new ArrayList<>();
+        for (String line : message.split("\\R")) {
+            String trimmed = line.trim();
+            if (!trimmed.isEmpty()) {
+                nonBlankLines.add(trimmed);
+            }
+        }
+        if (nonBlankLines.isEmpty()) {
+            return "";
+        }
+        String first = nonBlankLines.get(0);
+        if (first.startsWith("Expected:") && nonBlankLines.size() > 1 && nonBlankLines.get(1).startsWith("but:")) {
+            return first + " | " + nonBlankLines.get(1);
+        }
+        return first;
     }
 
     private static String firstNonBlankLine(String message) {

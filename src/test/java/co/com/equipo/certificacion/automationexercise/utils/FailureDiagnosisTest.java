@@ -88,7 +88,7 @@ public class FailureDiagnosisTest {
 
         // Assert
         assertThat(diagnosis.category(), is(equalTo("VALOR_INESPERADO")));
-        assertThat(diagnosis.detail(), is(equalTo("Expected: \"Blue Topx\"")));
+        assertThat(diagnosis.detail(), is(equalTo("Expected: \"Blue Topx\" | but: was \"Blue Top\"")));
     }
 
     @Test
@@ -217,6 +217,22 @@ public class FailureDiagnosisTest {
         // Assert
         assertThat(diagnosis.detail().length(), is(lessThanOrEqualTo(200)));
         assertThat(diagnosis.detail().endsWith("..."), is(true));
+    }
+
+    @Test
+    public void includesButLineInDetailForHamcrestWaitUntilFailure() {
+        // Arrange
+        Throwable error = new AssertionError(
+                "\nExpected: an element that is visible\n     but: no matching element found by [cart row for Blue Top located with: #x]");
+
+        // Act
+        Diagnosis diagnosis = FailureDiagnosis.of(error);
+
+        // Assert
+        assertThat(diagnosis.category(), is(equalTo("ELEMENTO_NO_DISPONIBLE")));
+        assertThat(diagnosis.detail(), containsString("Expected: an element that is visible"));
+        assertThat(diagnosis.detail(), containsString("no matching element found by"));
+        assertThat(diagnosis.detail().length(), is(lessThanOrEqualTo(200)));
     }
 }
 
