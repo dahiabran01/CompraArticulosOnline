@@ -13,7 +13,7 @@ final class ShopAssertions {
     private ShopAssertions() {}
 
     static void verifyText(Target target, String expected) {
-        actor().attemptsTo(WaitUntil.the(target, isVisible()));
+        actor().attemptsTo(WaitUntil.the(target, isVisible()).forNoMoreThan(10).seconds());
         actor().should(seeThat(DisplayedText.of(target), equalToIgnoringCase(expected)));
     }
 }

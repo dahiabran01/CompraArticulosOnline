@@ -27,7 +27,7 @@ public class CatalogSteps {
 
     @When("the shopper searches for {string}")
     public void search(String query) {
-        actor().attemptsTo(BrowseCatalog.searchFor(query), WaitUntil.the(CatalogPage.RESULTS_TITLE, isVisible()));
+        actor().attemptsTo(BrowseCatalog.searchFor(query), WaitUntil.the(CatalogPage.RESULTS_TITLE, isVisible()).forNoMoreThan(10).seconds());
     }
 
     @Then("the search results include {string}")

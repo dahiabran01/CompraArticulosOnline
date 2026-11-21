@@ -30,6 +30,6 @@ public class DeleteTestAccount implements Task {
         if (ACCOUNT.resolveFor(actor).isCurrentlyVisible()) {
             actor.attemptsTo(on(ACCOUNT), SignIn.with(shopper.email(), shopper.password()));
         }
-        actor.attemptsTo(on(DELETE_ACCOUNT), WaitUntil.the(DELETED, isVisible()));
+        actor.attemptsTo(on(DELETE_ACCOUNT), WaitUntil.the(DELETED, isVisible()).forNoMoreThan(10).seconds());
     }
 }

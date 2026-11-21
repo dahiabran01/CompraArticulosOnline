@@ -49,7 +49,7 @@ public class CheckoutSteps {
 
     private void verifyRegisteredAddress(Target address) {
         Shopper shopper = registeredAccount();
-        actor().attemptsTo(WaitUntil.the(address, isVisible()));
+        actor().attemptsTo(WaitUntil.the(address, isVisible()).forNoMoreThan(10).seconds());
         actor().should(seeThat(DisplayedText.of(address), allOf(
                 containsString(shopper.displayName()), containsString(shopper.street()),
                 containsString(shopper.city()), containsString(shopper.state()),
@@ -98,7 +98,7 @@ public class CheckoutSteps {
 
     @When("the shopper chooses to continue on the cart")
     public void continueOnCart() {
-        actor().attemptsTo(on(CartPage.CONTINUE_ON_CART), WaitUntil.the(CartPage.REGISTER_OR_LOGIN, isNotVisible()));
+        actor().attemptsTo(on(CartPage.CONTINUE_ON_CART), WaitUntil.the(CartPage.REGISTER_OR_LOGIN, isNotVisible()).forNoMoreThan(10).seconds());
     }
 
     @Then("the checkout prompt closes and the cart remains available")

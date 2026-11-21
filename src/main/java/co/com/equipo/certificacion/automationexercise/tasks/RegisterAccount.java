@@ -24,7 +24,7 @@ public final class RegisterAccount {
     public static Performable forShopper(Shopper shopper) {
         return Task.where("{0} creates a new shopper account",
                 startFor(shopper),
-                WaitUntil.the(PASSWORD, isVisible()),
+                WaitUntil.the(PASSWORD, isVisible()).forNoMoreThan(10).seconds(),
                 Enter.theValue(shopper.password()).into(PASSWORD),
                 Enter.theValue(shopper.firstName()).into(FIRST_NAME),
                 Enter.theValue(shopper.lastName()).into(LAST_NAME),

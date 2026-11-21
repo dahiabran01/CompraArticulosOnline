@@ -36,7 +36,7 @@ public class AccountSteps {
     public void register() {
         Shopper shopper = Shopper.newAccount();
         actor().attemptsTo(RegisterAccount.forShopper(shopper));
-        actor().attemptsTo(WaitUntil.the(AccountPage.CREATED, isVisible()));
+        actor().attemptsTo(WaitUntil.the(AccountPage.CREATED, isVisible()).forNoMoreThan(10).seconds());
         rememberAccount(shopper);
     }
 

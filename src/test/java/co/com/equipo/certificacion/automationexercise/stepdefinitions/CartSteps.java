@@ -24,14 +24,14 @@ import static org.hamcrest.Matchers.equalTo;
 public class CartSteps {
     @Given("the shopper has an empty cart")
     public void openEmptyCart() {
-        actor().wasAbleTo(StartShopping.at(Shop.CART), WaitUntil.the(CartPage.EMPTY, isVisible()));
+        actor().wasAbleTo(StartShopping.at(Shop.CART), WaitUntil.the(CartPage.EMPTY, isVisible()).forNoMoreThan(10).seconds());
     }
 
     @Given("the shopper has {string} with a quantity of {int} in the cart")
     public void prepareCart(String product, int quantity) {
         openEmptyCart();
         addToCart(product, quantity);
-        actor().wasAbleTo(WaitUntil.the(CartPage.ROW_FOR.of(product), isVisible()));
+        actor().wasAbleTo(WaitUntil.the(CartPage.ROW_FOR.of(product), isVisible()).forNoMoreThan(10).seconds());
     }
 
     @When("the shopper adds {string} with a quantity of {int} and opens the cart")

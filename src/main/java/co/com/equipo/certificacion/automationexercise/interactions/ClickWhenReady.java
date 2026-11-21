@@ -27,6 +27,6 @@ public class ClickWhenReady implements Interaction {
     public <T extends Actor> void performAs(T actor) {
         String targetName = target == null ? "elemento" : target.getName();
         Narrator.says(actor, "hace clic en \"" + targetName + "\"");
-        actor.attemptsTo(WaitUntil.the(target, isClickable()), Click.on(target));
+        actor.attemptsTo(WaitUntil.the(target, isClickable()).forNoMoreThan(10).seconds(), Click.on(target));
     }
 }
