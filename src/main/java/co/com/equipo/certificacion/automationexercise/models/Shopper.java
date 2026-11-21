@@ -14,4 +14,9 @@ public record Shopper(String firstName, String lastName, String email, String pa
     public String displayName() {
         return firstName + " " + lastName;
     }
+
+    @Override
+    public String toString() {
+        return "Shopper[name=" + displayName() + ", email=" + email + ", password=****]";
+    }
 }
