@@ -5,6 +5,7 @@ import net.serenitybdd.screenplay.targets.Target;
 public final class CartPage {
     private static final String ROW = "//div[@id='cart_info']//tr[starts-with(@id,'product-') and td[@class='cart_description']//a[normalize-space()=\"{0}\"]]";
     public static final Target EMPTY = Target.the("empty cart notice").locatedBy("#empty_cart b");
+    public static final Target ROWS = Target.the("cart product rows").locatedBy("#cart_info tr[id^='product-']");
     public static final Target PRODUCT_NAMES = Target.the("cart products").locatedBy("#cart_info tr[id^='product-'] .cart_description h4 a");
     public static final Target QUANTITY = Target.the("cart quantity for {0}")
             .locatedBy(ROW + "//td[@class='cart_quantity']");
