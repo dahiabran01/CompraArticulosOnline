@@ -3,9 +3,9 @@ package co.com.equipo.certificacion.automationexercise.userinterfaces;
 import net.serenitybdd.screenplay.targets.Target;
 
 public final class CartPage {
-    private static final String ROW = "//table[@id='cart_info_table']//tr[td[@class='cart_description']//a[normalize-space()=\"{0}\"]]";
+    private static final String ROW = "//div[@id='cart_info']//tr[starts-with(@id,'product-') and td[@class='cart_description']//a[normalize-space()=\"{0}\"]]";
     public static final Target EMPTY = Target.the("empty cart notice").locatedBy("#empty_cart b");
-    public static final Target PRODUCT_NAMES = Target.the("cart products").locatedBy("#cart_info_table .cart_description h4 a");
+    public static final Target PRODUCT_NAMES = Target.the("cart products").locatedBy("#cart_info tr[id^='product-'] .cart_description h4 a");
     public static final Target QUANTITY = Target.the("cart quantity for {0}")
             .locatedBy(ROW + "//td[@class='cart_quantity']");
     public static final Target UNIT_PRICE = Target.the("unit price for {0}")
