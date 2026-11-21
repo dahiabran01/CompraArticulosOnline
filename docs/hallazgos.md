@@ -114,9 +114,11 @@ Ningún escenario fue eliminado, comentado ni relajado; ningún valor esperado f
 
 ---
 
-## 5. Defectos e inestabilidades encontrados en el sitio
+## 5. Defectos encontrados en el sitio
 
-- **Sobrecarga intermitente del sitio (`heavy load (queue full)`):** Durante la corrida 2 sobre `2311e3a`, `automationexercise.com` respondió en `AC10` con la página estática `This website is under heavy load (queue full)` en lugar de la tienda. Es una limitación de capacidad del entorno público de pruebas; no se suaviza ninguna aserción ni se aumenta `wait.for.timeout`.
+- **Sobrecarga intermitente del sitio (`This website is under heavy load (queue full)`):** El servidor público de `automationexercise.com` devuelve ocasionalmente la página estática de error `<h2>This website is under heavy load (queue full)</h2>` en lugar de la tienda. No corresponde a un fallo de las pruebas; no se suaviza ninguna aserción ni se aumenta `wait.for.timeout`:
+  - **Corrida diagnóstica base 2 (`2311e3a`, `AC10`, `shopping_cart.feature:25`):** captura `target/site/serenity/88c133aa67a763fdf63c5db6ba008c25a256fbd8b9515e816625f3c47cb294ec.png` y HTML `pagesource1448032984607189993.html` (extracto en sección 4.3).
+  - **Corrida post-corrección 2 (`1d008ee`, `AC03`, `account.feature:21`):** al abrir el sitio para hacer clic en `Signup / Login`, el servidor respondió con `heavy load (queue full)` y tras esperar `10.4 s` con `.forNoMoreThan(10).seconds()` el paso falló en `ELEMENTO_NO_DISPONIBLE`. Evidencia: captura `target/site/serenity/88c133aa67a763fdf63c5db6ba008c25a256fbd8b9515e816625f3c47cb294ec.png` y HTML `pagesource5713637551968922988.html` (`<h2>This website is under heavy load (queue full)</h2>`). `AC03` pasó sin fallos en la corrida post-corrección 1 y en las dos corridas diagnósticas base.
 
 ---
 
@@ -126,4 +128,16 @@ Ningún escenario fue eliminado, comentado ni relajado; ningún valor esperado f
 - **Timeout por defecto de `WaitUntil.the(...)` cuando `timeouts.implicitlywait = 0`:** En Serenity 4.1.3 (`SystemPropertiesConfiguration.getElementTimeoutInSeconds()`), `EventualConsequence` toma su duración de `webdriver.timeouts.implicitlywait / 1000` (`0 s` por la regla 2) cuando no se indica `.forNoMoreThan(...)`, realizando un único intento sin sondeo ante transiciones AJAX/animaciones (observado en `AC10` al borrar una fila con `isNotVisible()`). Se añadió `.forNoMoreThan(10).seconds()` a los `WaitUntil.the(...)` existentes para respetar los 10 s configurados en `wait.for.timeout` sin usar esperas implícitas ni `Thread.sleep`.
 - **Microcorte de red local durante validación intermedia:** En una corrida intermedia sobre `92a88fa`, `AC14` falló al abrir la ficha de `Men Tshirt` por una desconexión puntual de red del equipo (`ERR_INTERNET_DISCONNECTED`, captura `target/site/serenity/a747f21fce9b3da402ed393899c6c8c86d346637c4f7c6b5ddfefec21474263a.png`).
 - **Valores esperados:** No se modificó ningún valor esperado de los criterios `@AC01`–`@AC26` ni de los archivos `.feature`.
+
+---
+
+## 7. Resultados tras las correcciones (2 corridas consecutivas)
+
+Ambas corridas se ejecutaron con `.\gradlew.bat clean test` sobre el código final de Fase 2 (`1d008ee`):
+
+| Corrida | Resultado | Duración | Escenarios corregidos | Observaciones |
+|---|---|---|---|---|
+| Corrida 1 (`1d008ee`) | **26 pasaron / 0 fallaron / 0 omitidos** | 15 min 30 s | `AC08`×2, `AC10`, `AC11/AC12`, `AC14`, `AC19`, `AC26` en verde | 100 % en verde |
+| Corrida 2 (`1d008ee`) | **25 pasaron / 1 fallaron / 0 omitidos** | 14 min 59 s | Todos los escenarios que cargaron la tienda (incluidos `AC08`×2, `AC10`, `AC11/AC12`, `AC14`, `AC19`, `AC26`) en verde | Único fallo en `AC03` por página `This website is under heavy load (queue full)` del sitio (sección 5). |
+
 
