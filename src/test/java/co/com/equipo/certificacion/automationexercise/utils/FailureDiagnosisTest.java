@@ -1,5 +1,6 @@
 package co.com.equipo.certificacion.automationexercise.utils;
 
+import co.com.equipo.certificacion.automationexercise.exceptions.CheckoutDataMismatch;
 import co.com.equipo.certificacion.automationexercise.utils.FailureDiagnosis.Diagnosis;
 import org.junit.Test;
 
@@ -233,6 +234,23 @@ public class FailureDiagnosisTest {
         assertThat(diagnosis.detail(), containsString("Expected: an element that is visible"));
         assertThat(diagnosis.detail(), containsString("no matching element found by"));
         assertThat(diagnosis.detail().length(), is(lessThanOrEqualTo(200)));
+    }
+
+    @Test
+    public void classifiesRealShopExpectationSubclassAndTrimsTrailingComplaintDash() {
+        // Arrange
+        Throwable cause = new AssertionError("\nExpected: \"Rs. 9999\"\n     but: was \"Rs. 1000\"");
+        Throwable error = new CheckoutDataMismatch(
+                "AC11: el total del pedido no coincide - " + cause.getMessage(),
+                cause);
+
+        // Act
+        Diagnosis diagnosis = FailureDiagnosis.of(error);
+
+        // Assert
+        assertThat(diagnosis.category(), is(equalTo("REGLA_DE_NEGOCIO")));
+        assertThat(diagnosis.probableCause(), is(equalTo(
+                "El sitio respondio, pero el resultado no cumple el criterio de aceptacion: AC11: el total del pedido no coincide")));
     }
 }
 

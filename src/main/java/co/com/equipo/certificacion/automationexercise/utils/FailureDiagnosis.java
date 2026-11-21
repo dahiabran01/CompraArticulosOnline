@@ -39,6 +39,9 @@ public final class FailureDiagnosis {
         for (Throwable cause : chain) {
             if (isShopExpectationError(cause)) {
                 String message = firstNonBlankLine(cause.getMessage());
+                if (message.endsWith(" -")) {
+                    message = message.substring(0, message.length() - 2).trim();
+                }
                 String probableCause = message.isEmpty()
                         ? "El sitio respondio, pero el resultado no cumple el criterio de aceptacion"
                         : "El sitio respondio, pero el resultado no cumple el criterio de aceptacion: " + message;
