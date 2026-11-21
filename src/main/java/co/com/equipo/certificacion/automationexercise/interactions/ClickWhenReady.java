@@ -6,12 +6,17 @@ import net.serenitybdd.annotations.Step;
 import net.serenitybdd.screenplay.Actor;
 import net.serenitybdd.screenplay.Interaction;
 import net.serenitybdd.screenplay.Tasks;
-import net.serenitybdd.screenplay.actions.Click;
+import net.serenitybdd.screenplay.abilities.BrowseTheWeb;
 import net.serenitybdd.screenplay.targets.Target;
 import net.serenitybdd.screenplay.waits.WaitUntil;
+import org.openqa.selenium.ElementClickInterceptedException;
+import org.openqa.selenium.JavascriptExecutor;
 
 import static net.serenitybdd.screenplay.matchers.WebElementStateMatchers.isClickable;
 
+/**
+ * Espera a que un elemento sea clicable y realiza un unico reintento centrado si otro elemento lo tapa.
+ */
 public class ClickWhenReady implements Interaction {
     private final Target target;
 
@@ -28,6 +33,17 @@ public class ClickWhenReady implements Interaction {
     public <T extends Actor> void performAs(T actor) {
         String targetName = target == null ? "elemento" : target.getName();
         Narrator.says(actor, "hace clic en \"" + targetName + "\"");
-        actor.attemptsTo(WaitUntil.the(target, isClickable()).forNoMoreThan(WaitTimeouts.seconds()).seconds(), Click.on(target));
+        actor.attemptsTo(WaitUntil.the(target, isClickable()).forNoMoreThan(WaitTimeouts.seconds()).seconds());
+        try {
+            target.resolveFor(actor).click();
+        } catch (ElementClickInterceptedException intercepted) {
+            scrollIntoCenter(actor);
+            target.resolveFor(actor).click();
+        }
+    }
+
+    private void scrollIntoCenter(Actor actor) {
+        JavascriptExecutor executor = (JavascriptExecutor) BrowseTheWeb.as(actor).getDriver();
+        executor.executeScript("arguments[0].scrollIntoView({block:'center'});", target.resolveFor(actor).getElement());
     }
 }
