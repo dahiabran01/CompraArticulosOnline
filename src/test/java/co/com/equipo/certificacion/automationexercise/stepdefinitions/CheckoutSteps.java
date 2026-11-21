@@ -1,8 +1,10 @@
 package co.com.equipo.certificacion.automationexercise.stepdefinitions;
 
+import co.com.equipo.certificacion.automationexercise.models.PaymentCard;
 import co.com.equipo.certificacion.automationexercise.models.Shopper;
 import co.com.equipo.certificacion.automationexercise.questions.DisplayedText;
 import co.com.equipo.certificacion.automationexercise.tasks.CompleteCheckout;
+import co.com.equipo.certificacion.automationexercise.tasks.PayForOrder;
 import co.com.equipo.certificacion.automationexercise.userinterfaces.AccountPage;
 import co.com.equipo.certificacion.automationexercise.userinterfaces.CartPage;
 import co.com.equipo.certificacion.automationexercise.userinterfaces.CheckoutPage;
@@ -83,7 +85,7 @@ public class CheckoutSteps {
 
     @When("the shopper submits the order with test payment details")
     public void payForOrder() {
-        actor().attemptsTo(CompleteCheckout.payWithTestCard(registeredAccount().displayName()));
+        actor().attemptsTo(PayForOrder.with(PaymentCard.testCardFor(registeredAccount().displayName())));
     }
 
     @Then("the shop confirms that the order was placed")

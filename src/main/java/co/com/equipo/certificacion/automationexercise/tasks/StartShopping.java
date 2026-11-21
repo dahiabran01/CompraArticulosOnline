@@ -8,12 +8,11 @@ import net.serenitybdd.screenplay.targets.Target;
 import static co.com.equipo.certificacion.automationexercise.interactions.ClickWhenReady.on;
 
 public final class StartShopping {
-    private static final String HOME = "https://automationexercise.com/";
-
     private StartShopping() {}
 
     public static Performable at(Target destination) {
         return Task.where("{0} opens Automation Exercise and goes to " + destination.getName(),
-                Open.url(HOME), on(destination));
+                Open.browserOn().thePageNamed("pages.home"),
+                on(destination));
     }
 }
