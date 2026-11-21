@@ -11,6 +11,8 @@ public final class AccountPage {
     public static final Target SIGNUP_ERROR = Target.the("sign-up error").locatedBy(".signup-form form p");
     public static final Target LOGIN_EMAIL = field("login-email");
     public static final Target LOGIN_PASSWORD = field("login-password");
+    public static final Target MISSING_LOGIN_PASSWORD = Target.the("required empty sign-in password")
+            .locatedBy("css:[data-qa='login-password']:required:invalid");
     public static final Target LOGIN_BUTTON = field("login-button");
     public static final Target LOGIN_ERROR = Target.the("sign-in error").locatedBy(".login-form form p");
     public static final Target PASSWORD = field("password");

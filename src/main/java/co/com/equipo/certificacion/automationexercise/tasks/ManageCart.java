@@ -20,8 +20,12 @@ public final class ManageCart {
                 on(PRODUCTS),
                 BrowseCatalog.view(product),
                 Enter.theValue(Integer.toString(quantity)).into(QUANTITY),
-                on(ADD_TO_CART),
-                on(VIEW_CART));
+                addFromDetails());
+    }
+
+    public static Performable addFromDetails() {
+        return Task.where("{0} adds the product from its details and opens the cart",
+                on(ADD_TO_CART), on(VIEW_CART));
     }
 
     public static Performable remove(String product) {

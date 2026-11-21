@@ -10,6 +10,11 @@ import static co.com.equipo.certificacion.automationexercise.userinterfaces.Acco
 public final class SignIn {
     private SignIn() {}
 
+    public static Performable withoutPassword(String email) {
+        return Task.where("{0} attempts to sign in without a password",
+                Enter.theValue(email).into(LOGIN_EMAIL), on(LOGIN_BUTTON));
+    }
+
     public static Performable with(String email, String password) {
         return Task.where("{0} signs in to the shop",
                 Enter.theValue(email).into(LOGIN_EMAIL),

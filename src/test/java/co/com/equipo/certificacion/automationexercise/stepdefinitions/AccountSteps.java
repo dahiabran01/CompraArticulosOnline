@@ -6,6 +6,7 @@ import co.com.equipo.certificacion.automationexercise.tasks.RegisterAccount;
 import co.com.equipo.certificacion.automationexercise.tasks.SignIn;
 import co.com.equipo.certificacion.automationexercise.tasks.StartShopping;
 import co.com.equipo.certificacion.automationexercise.userinterfaces.AccountPage;
+import co.com.equipo.certificacion.automationexercise.userinterfaces.CartPage;
 import co.com.equipo.certificacion.automationexercise.userinterfaces.Shop;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -57,7 +58,37 @@ public class AccountSteps {
     @Given("the shopper has just registered and is signed in")
     public void createSignedInAccount() {
         openSignup();
+        completeRegistration();
+    }
+
+    @Given("the shopper is signed in with a new account")
+    public void registerFromStorefront() {
+        openSignIn();
+        completeRegistration();
+    }
+
+    @Given("the shopper has an account and is browsing as a guest")
+    public void prepareReturningGuest() {
+        registerFromStorefront();
+        signOut();
+    }
+
+    @When("the shopper registers from the checkout prompt")
+    public void registerFromCheckout() {
+        actor().attemptsTo(on(CartPage.REGISTER_OR_LOGIN));
+        completeRegistration();
+    }
+
+    @When("the shopper signs in from the checkout prompt")
+    public void signInFromCheckout() {
+        actor().attemptsTo(on(CartPage.REGISTER_OR_LOGIN));
+        signIn();
+        verifyShopperName();
+    }
+
+    private void completeRegistration() {
         register();
+        verifyRegistration("Account Created!");
         continueAfterRegistration();
         verifyShopperName();
     }
@@ -121,6 +152,17 @@ public class AccountSteps {
     @Then("the sign-up form displays the error {string}")
     public void verifySignupError(String message) {
         verifyText(AccountPage.SIGNUP_ERROR, message);
+    }
+
+    @When("the shopper submits the sign-in form with an email and no password")
+    public void signInWithoutPassword() {
+        actor().attemptsTo(SignIn.withoutPassword(Shopper.newAccount().email()));
+    }
+
+    @Then("the password is required and the shopper remains signed out")
+    public void verifyMissingPassword() {
+        verifySignedOut();
+        actor().should(seeThat(the(AccountPage.MISSING_LOGIN_PASSWORD), isVisible()));
     }
 
     @Then("the sign-in form displays {string}")

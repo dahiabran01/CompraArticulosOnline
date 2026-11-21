@@ -10,7 +10,8 @@ public final class DisplayedText {
     private DisplayedText() {}
 
     public static Question<String> of(Target target) {
-        return Text.of(target);
+        return Question.about(target.getName())
+                .answeredBy(actor -> Text.of(target).answeredBy(actor).replaceAll("[\\s\\u00a0]+", " ").trim());
     }
 
     public static Question<Collection<String>> ofAll(Target target) {

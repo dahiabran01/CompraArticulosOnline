@@ -2,7 +2,7 @@
 Feature: Shopper accounts
   A shopper can create an account and sign in with the registered credentials.
 
-  @AC01
+  @AC01 @happy
   Scenario: Create an account with a new email
     Given the shopper is on the sign-up page
     When the shopper registers a new account
@@ -16,7 +16,7 @@ Feature: Shopper accounts
     When the shopper starts sign-up with the registered email
     Then the sign-up form displays the error "Email Address already exist!"
 
-  @AC03
+  @AC03 @happy
   Scenario: Sign in with valid credentials
     Given the shopper has registered an account and signed out
     When the shopper signs in with the registered credentials
@@ -27,17 +27,24 @@ Feature: Shopper accounts
     Given the shopper has registered an account and signed out
     When the shopper signs in with an incorrect password
     Then the sign-in form displays "Your email or password is incorrect!"
+    And the sign-in page is displayed and the shopper is signed out
 
-  @AC15
+  @AC15 @alternate
   Scenario: Sign out of a shopper account
     Given the shopper has just registered and is signed in
     When the shopper signs out
     Then the sign-in page is displayed and the shopper is signed out
 
-  @AC16
+  @AC16 @negative
   Scenario: Reject sign-in after the shopper deletes the account
     Given the shopper has just registered and is signed in
     When the shopper deletes the account
     Then the shop confirms that the account was deleted
     When the shopper continues and tries to sign in with the deleted account
     Then the sign-in form displays "Your email or password is incorrect!"
+
+  @AC20 @negative @boundary
+  Scenario: Block sign-in when the required password is empty
+    Given the shopper is on the sign-up page
+    When the shopper submits the sign-in form with an email and no password
+    Then the password is required and the shopper remains signed out
