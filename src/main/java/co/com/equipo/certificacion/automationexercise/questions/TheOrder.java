@@ -1,6 +1,7 @@
 package co.com.equipo.certificacion.automationexercise.questions;
 
 import co.com.equipo.certificacion.automationexercise.userinterfaces.CheckoutPage;
+import co.com.equipo.certificacion.automationexercise.utils.Money;
 import co.com.equipo.certificacion.automationexercise.utils.WaitTimeouts;
 import net.serenitybdd.screenplay.Question;
 import net.serenitybdd.screenplay.targets.Target;
@@ -15,6 +16,11 @@ public final class TheOrder {
 
     public static Question<String> total() {
         return normalizedText("order total", CheckoutPage.ORDER_TOTAL);
+    }
+
+    public static Question<Integer> totalAmount() {
+        return Question.about("order total amount")
+                .answeredBy(actor -> Money.rupees(total().answeredBy(actor)));
     }
 
     public static Question<String> deliveryAddress() {

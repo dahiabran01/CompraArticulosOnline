@@ -52,6 +52,19 @@ public final class TheCart {
                 .answeredBy(actor -> CartPage.REGISTER_OR_LOGIN.isVisibleFor(actor));
     }
 
+    public static Question<Boolean> allSubtotalsMatchUnitPriceTimesQuantity() {
+        return Question.about("whether every cart line subtotal equals unit price times quantity")
+                .answeredBy(actor -> {
+                    List<CartItem> items = items().answeredBy(actor);
+                    return !items.isEmpty() && items.stream().allMatch(CartItem::hasConsistentSubtotal);
+                });
+    }
+
+    public static Question<Integer> sumOfSubtotals() {
+        return Question.about("sum of cart line subtotals")
+                .answeredBy(actor -> items().answeredBy(actor).stream().mapToInt(CartItem::subtotal).sum());
+    }
+
     private static List<CartItem> readItems(Actor actor) {
         List<WebElementFacade> rows = CartPage.ROWS.resolveAllFor(actor);
         List<CartItem> items = new ArrayList<>();

@@ -80,7 +80,7 @@ public class CheckoutSteps {
     public void verifyOrderProducts(String firstProduct, String secondProduct) {
         actor().should(seeThat(TheCart.productNames(), containsInAnyOrder(firstProduct, secondProduct))
                 .orComplainWith(CheckoutDataMismatch.class,
-                        "AC14: el resumen del pedido no lista exactamente los productos agregados"));
+                        "AC14/AC27: el resumen del pedido no lista exactamente los productos agregados"));
     }
 
     @Then("the order summary shows {string} with a quantity of {int} and a subtotal of {string}")
@@ -169,5 +169,24 @@ public class CheckoutSteps {
                 seeThat(TheOrderConfirmation.isDisplayed(), is(false))
                         .orComplainWith(CheckoutDataMismatch.class,
                                 "AC28: se mostro confirmacion de pedido pese a omitir el numero de tarjeta"));
+    }
+
+    @Then("the order summary shows {string} with a quantity of {int}")
+    public void verifyOrderLineQuantity(String product, int quantity) {
+        actor().should(seeThat(TheCart.quantityOf(product), equalTo(quantity))
+                .orComplainWith(CheckoutDataMismatch.class,
+                        "AC27: la cantidad en el resumen del pedido no coincide con la esperada"));
+    }
+
+    @Then("each order line subtotal matches unit price times quantity and the order total equals their sum")
+    public void verifyOrderCalculationRule() {
+        int expectedTotal = actor().asksFor(TheCart.sumOfSubtotals());
+        actor().should(
+                seeThat(TheCart.allSubtotalsMatchUnitPriceTimesQuantity(), is(true))
+                        .orComplainWith(CheckoutDataMismatch.class,
+                                "AC27: el subtotal de alguna linea no coincide con precio unitario por cantidad"),
+                seeThat(TheOrder.totalAmount(), equalTo(expectedTotal))
+                        .orComplainWith(CheckoutDataMismatch.class,
+                                "AC27: el total del pedido no coincide con la suma de los subtotales de las lineas"));
     }
 }

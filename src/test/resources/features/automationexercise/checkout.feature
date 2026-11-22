@@ -82,3 +82,20 @@ Feature: Checkout and order confirmation
     When the shopper proceeds to checkout
     And the shopper submits the order without a card number
     Then the card number is required and the order is not placed
+
+  @AC27 @boundary @happy
+  Scenario Outline: Order total follows the line subtotals
+    Given the shopper is signed in with a new account
+    And the shopper adds "Blue Top" with a quantity of <q1> and opens the cart
+    And the shopper adds "Men Tshirt" with a quantity of <q2> and opens the cart
+    When the shopper proceeds to checkout
+    Then the order summary lists only "Blue Top" and "Men Tshirt"
+    And the order summary shows "Blue Top" with a quantity of <q1>
+    And the order summary shows "Men Tshirt" with a quantity of <q2>
+    And each order line subtotal matches unit price times quantity and the order total equals their sum
+
+    Examples:
+      | q1 | q2 |
+      | 1  | 1  |
+      | 3  | 2  |
+      | 10 | 1  |
