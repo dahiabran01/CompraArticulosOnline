@@ -9,6 +9,7 @@ import net.thucydides.model.environment.SystemEnvironmentVariables;
 public final class WaitTimeouts {
     private static final String WAIT_FOR_TIMEOUT_PROPERTY = "webdriver.wait.for.timeout";
     private static final long DEFAULT_TIMEOUT_MILLIS = 10_000L;
+    private static final long CART_REMOVAL_MIN_SECONDS = 20L;
 
     private WaitTimeouts() {}
 
@@ -18,6 +19,15 @@ public final class WaitTimeouts {
     public static long seconds() {
         long millis = configuredTimeoutMillis();
         return Math.max(1L, (millis + 999L) / 1_000L);
+    }
+
+    /**
+     * Devuelve el limite de espera especifico para el borrado AJAX en /view_cart (/delete_cart/),
+     * que en automationexercise.com supera intermitentemente los 10 s sin modificar el limite
+     * global webdriver.wait.for.timeout (ver docs/hallazgos.md, secciones 3 y 5).
+     */
+    public static long cartRemovalSeconds() {
+        return Math.max(CART_REMOVAL_MIN_SECONDS, seconds());
     }
 
     private static long configuredTimeoutMillis() {

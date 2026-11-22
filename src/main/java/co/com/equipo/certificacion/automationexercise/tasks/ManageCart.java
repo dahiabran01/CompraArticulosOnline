@@ -32,6 +32,6 @@ public final class ManageCart {
     public static Performable remove(String product) {
         return Task.where("{0} removes " + product + " from the cart",
                 on(CartPage.REMOVE.of(product)),
-                WaitUntil.the(CartPage.ROW_FOR.of(product), isNotVisible()).forNoMoreThan(WaitTimeouts.seconds()).seconds());
+                WaitUntil.the(CartPage.ROW_FOR.of(product), isNotVisible()).forNoMoreThan(WaitTimeouts.cartRemovalSeconds()).seconds());
     }
 }
