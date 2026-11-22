@@ -30,6 +30,7 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.is;
@@ -182,7 +183,7 @@ public class CheckoutSteps {
     public void verifyOrderCalculationRule() {
         int expectedTotal = actor().asksFor(TheCart.sumOfSubtotals());
         actor().should(
-                seeThat(TheCart.allSubtotalsMatchUnitPriceTimesQuantity(), is(true))
+                seeThat(TheCart.inconsistentItems(), empty())
                         .orComplainWith(CheckoutDataMismatch.class,
                                 "AC27: el subtotal de alguna linea no coincide con precio unitario por cantidad"),
                 seeThat(TheOrder.totalAmount(), equalTo(expectedTotal))

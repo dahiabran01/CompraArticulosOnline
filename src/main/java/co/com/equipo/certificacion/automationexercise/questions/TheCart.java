@@ -52,12 +52,11 @@ public final class TheCart {
                 .answeredBy(actor -> CartPage.REGISTER_OR_LOGIN.isVisibleFor(actor));
     }
 
-    public static Question<Boolean> allSubtotalsMatchUnitPriceTimesQuantity() {
-        return Question.about("whether every cart line subtotal equals unit price times quantity")
-                .answeredBy(actor -> {
-                    List<CartItem> items = items().answeredBy(actor);
-                    return !items.isEmpty() && items.stream().allMatch(CartItem::hasConsistentSubtotal);
-                });
+    public static Question<List<CartItem>> inconsistentItems() {
+        return Question.about("cart items with inconsistent subtotal")
+                .answeredBy(actor -> items().answeredBy(actor).stream()
+                        .filter(item -> !item.hasConsistentSubtotal())
+                        .toList());
     }
 
     public static Question<Integer> sumOfSubtotals() {
