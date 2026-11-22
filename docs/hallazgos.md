@@ -144,4 +144,41 @@ Ambas corridas se ejecutaron con `.\gradlew.bat clean test` sobre el código fin
 | Corrida 1 (`1d008ee`) | **26 pasaron / 0 fallaron / 0 omitidos** | 15 min 30 s | `AC08`×2, `AC10`, `AC11/AC12`, `AC14`, `AC19`, `AC26` en verde | 100 % en verde |
 | Corrida 2 (`1d008ee`) | **25 pasaron / 1 fallaron / 0 omitidos** | 14 min 59 s | Todos los escenarios que cargaron la tienda (incluidos `AC08`×2, `AC10`, `AC11/AC12`, `AC14`, `AC19`, `AC26`) en verde | Único fallo en `AC03` por página `This website is under heavy load (queue full)` del sitio (sección 5). |
 
+---
+
+## 8. Comportamiento verificado para nuevos escenarios (Fase 4)
+
+Verificación manual previa contra `https://automationexercise.com` realizada antes de escribir cada escenario de la Fase 4 (la cuenta temporal usada para inspeccionar `/checkout` y `/payment` fue eliminada en la misma sesión):
+
+| AC | Feature | Estado | Comportamiento observado en el sitio real | Decisión |
+|---|---|---|---|---|
+| `AC27` | `checkout` | Determinista | Con `Blue Top` (`Rs. 500`) × `10` y `Men Tshirt` (`Rs. 400`) × `1`, `#quantity` en `/product_details/1` es `type="number" min="1"` sin atributo `max`; `/view_cart` lista `product-1` (qty `10`, subtotal `Rs. 5000`) y `product-2` (qty `1`, subtotal `Rs. 400`), y `/checkout` muestra `Total Amount`: `Rs. 5400`. | Se implementa como `Scenario Outline` (`1/1`, `3/2`, `10/1`) validando con `TheCart.items()` y `Money`. |
+| `AC28` | `checkout` | Determinista | En `/payment`, `<form action="/payment" id="payment-form" method="POST">` (sin `novalidate`) marca `data-qa="card-number"` como `required`. Al intentar enviar sin número de tarjeta, la validación HTML5 bloquea el envío (`css:[data-qa='card-number']:required:invalid`) y no se muestra `Order Placed!`. | Se implementa validando invalidez HTML5, permanencia del formulario y ausencia de confirmación. |
+| `AC29` | `account` | Determinista | En `/signup`, `<form action="/signup" method="POST">` (sin `novalidate`) marca `data-qa="password"` como `required`. Al llenar los demás campos obligatorios y enviar sin contraseña, el navegador bloquea el envío (`css:[data-qa='password']:required:invalid`), el formulario permanece visible y no se crea la cuenta. | Se implementa sin registrar cuenta en memoria (`@After` no deja cuentas basura). |
+| `AC30` | `shopping_cart` | Determinista | Agregar `Blue Top` con cantidad `1` y luego agregar `Blue Top` con cantidad `2` en la misma sesión consolida una única fila `<tr id="product-1">` en `/view_cart` con cantidad `3` y subtotal `Rs. 1500`. | Se implementa verificando una única fila, cantidad `3`, precio `Rs. 500` y subtotal `Rs. 1500`. |
+| `AC05` (ampliar) | `catalog` | Determinista | `GET /products?search=blue%20top` devuelve `Blue Top`, igual que la búsqueda `"Blue Top"`. | Se amplía `@AC05` a `Scenario Outline` con ejemplos `Blue Top` y `blue top` (sin crear nuevo AC). |
+
+### Extractos HTML literales observados (Fase 4)
+
+- **Cantidad en ficha de producto (`/product_details/1`, `AC27`):**
+  ```html
+  <input type="number" name="quantity" id="quantity" value="1" min="1" />
+  ```
+- **Acumulación en `/view_cart` tras agregar `Blue Top` 1 + 2 (`AC30`):**
+  ```html
+  <tr id="product-1"> ... <td class="cart_description"> <h4><a href="/product_details/1">Blue Top</a></h4> <p>Women &gt; Tops</p> </td> <td class="cart_price"> <p>Rs. 500</p> </td> <td class="cart_quantity"> <button class="disabled">3</button> </td> <td class="cart_total"> <p class="cart_total_price">Rs. 1500</p> </td> ... </tr>
+  ```
+- **Contraseña obligatoria en `/signup` (`AC29`):**
+  ```html
+  <form action="/signup" method="POST">
+  <input type="password" class="form-control" data-qa="password" id="password" required name="password" value="">
+  <button type="submit" data-qa="create-account" class="btn btn-default">Create Account</button>
+  ```
+- **Número de tarjeta obligatorio en `/payment` (`AC28`):**
+  ```html
+  <form action="/payment" id="payment-form" method="POST">
+  <input name="card_number" data-qa="card-number" class='form-control card-number' required type='text'>
+  <button class='form-control btn btn-primary submit-button' data-qa="pay-button" id="submit" type='submit'>Pay and Confirm Order</button>
+  ```
+
 
