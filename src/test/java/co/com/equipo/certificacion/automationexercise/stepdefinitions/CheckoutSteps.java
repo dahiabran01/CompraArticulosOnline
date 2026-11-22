@@ -86,13 +86,10 @@ public class CheckoutSteps {
 
     @Then("the order summary shows {string} with a quantity of {int} and a subtotal of {string}")
     public void verifyOrderLine(String product, int quantity, String subtotal) {
-        actor().should(
-                seeThat(TheCart.quantityOf(product), equalTo(quantity))
-                        .orComplainWith(CheckoutDataMismatch.class,
-                                "AC11/AC14/AC19/AC26: la cantidad en el resumen del pedido no coincide con la esperada"),
-                seeThat(TheCart.subtotalOf(product), equalTo(Money.rupees(subtotal)))
-                        .orComplainWith(CheckoutDataMismatch.class,
-                                "AC11/AC14/AC19/AC26: el subtotal en el resumen del pedido no coincide con el esperado"));
+        verifyOrderLineQuantity(product, quantity);
+        actor().should(seeThat(TheCart.subtotalOf(product), equalTo(Money.rupees(subtotal)))
+                .orComplainWith(CheckoutDataMismatch.class,
+                        "AC11/AC14/AC19/AC26: el subtotal en el resumen del pedido no coincide con el esperado"));
     }
 
     @Then("the order total is {string}")
@@ -176,7 +173,7 @@ public class CheckoutSteps {
     public void verifyOrderLineQuantity(String product, int quantity) {
         actor().should(seeThat(TheCart.quantityOf(product), equalTo(quantity))
                 .orComplainWith(CheckoutDataMismatch.class,
-                        "AC27: la cantidad en el resumen del pedido no coincide con la esperada"));
+                        "AC11/AC14/AC19/AC26/AC27: la cantidad en el resumen del pedido no coincide con la esperada"));
     }
 
     @Then("each order line subtotal matches unit price times quantity and the order total equals their sum")
