@@ -25,6 +25,16 @@ public final class TheOrder {
         return normalizedText("billing address", CheckoutPage.BILLING_ADDRESS);
     }
 
+    public static Question<Boolean> isMissingCardNumber() {
+        return Question.about("whether the card number is invalid as required")
+                .answeredBy(actor -> CheckoutPage.MISSING_CARD_NUMBER.isVisibleFor(actor));
+    }
+
+    public static Question<Boolean> isPaymentFormVisible() {
+        return Question.about("whether the payment form is visible")
+                .answeredBy(actor -> CheckoutPage.PAY.isVisibleFor(actor));
+    }
+
     private static Question<String> normalizedText(String label, Target target) {
         return Question.about(label).answeredBy(actor -> target
                 .waitingForNoMoreThan(Duration.ofSeconds(WaitTimeouts.seconds()))

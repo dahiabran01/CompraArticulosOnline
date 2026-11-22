@@ -74,3 +74,11 @@ Feature: Checkout and order confirmation
     And the order total is "Rs. 500"
     When the shopper submits the order with test payment details
     Then the shop confirms that the order was placed
+
+  @AC28 @negative @boundary
+  Scenario: Block payment when the required card number is empty
+    Given the shopper is signed in with a new account
+    And the shopper adds "Blue Top" with a quantity of 1 and opens the cart
+    When the shopper proceeds to checkout
+    And the shopper submits the order without a card number
+    Then the card number is required and the order is not placed

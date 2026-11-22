@@ -21,6 +21,11 @@ public final class TheOrderConfirmation {
         return normalizedText("order confirmation message", CheckoutPage.CONFIRMATION);
     }
 
+    public static Question<Boolean> isDisplayed() {
+        return Question.about("whether the order confirmation is displayed")
+                .answeredBy(actor -> CheckoutPage.ORDER_PLACED.isVisibleFor(actor));
+    }
+
     private static Question<String> normalizedText(String label, Target target) {
         return Question.about(label).answeredBy(actor -> target
                 .waitingForNoMoreThan(Duration.ofSeconds(WaitTimeouts.seconds()))

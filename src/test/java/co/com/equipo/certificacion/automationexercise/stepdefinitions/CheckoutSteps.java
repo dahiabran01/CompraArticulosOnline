@@ -151,4 +151,23 @@ public class CheckoutSteps {
         verifyText(AccountPage.SIGNUP_TITLE, heading, AccountStateMismatch.class,
                 "AC13: no se mostro el encabezado del formulario de registro");
     }
+
+    @When("the shopper submits the order without a card number")
+    public void payWithoutCardNumber() {
+        actor().attemptsTo(PayForOrder.withoutCardNumber(PaymentCard.testCardFor(registeredAccount().displayName())));
+    }
+
+    @Then("the card number is required and the order is not placed")
+    public void verifyMissingCardNumber() {
+        actor().should(
+                seeThat(TheOrder.isMissingCardNumber(), is(true))
+                        .orComplainWith(CheckoutDataMismatch.class,
+                                "AC28: el campo numero de tarjeta no se marco como obligatorio e invalido"),
+                seeThat(TheOrder.isPaymentFormVisible(), is(true))
+                        .orComplainWith(CheckoutDataMismatch.class,
+                                "AC28: el formulario de pago dejo de estar visible al enviar sin numero de tarjeta"),
+                seeThat(TheOrderConfirmation.isDisplayed(), is(false))
+                        .orComplainWith(CheckoutDataMismatch.class,
+                                "AC28: se mostro confirmacion de pedido pese a omitir el numero de tarjeta"));
+    }
 }

@@ -10,6 +10,8 @@ public final class CheckoutPage {
     public static final Target PLACE_ORDER = Target.the("Place Order").locatedBy("css:a[href='/payment']");
     public static final Target CARDHOLDER = paymentField("name-on-card");
     public static final Target CARD_NUMBER = paymentField("card-number");
+    public static final Target MISSING_CARD_NUMBER = Target.the("required empty card number")
+            .locatedBy("css:[data-qa='card-number']:required:invalid");
     public static final Target CVC = paymentField("cvc");
     public static final Target EXPIRY_MONTH = paymentField("expiry-month");
     public static final Target EXPIRY_YEAR = paymentField("expiry-year");
