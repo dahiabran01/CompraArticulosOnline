@@ -55,3 +55,10 @@ Feature: Shopping cart
     When the shopper opens the details for "Blue Top"
     And the shopper adds the displayed product without changing its quantity
     Then the cart shows only "Blue Top" with a quantity of 1
+
+  @AC30 @boundary @alternate
+  Scenario: Accumulate quantity when adding the same product twice
+    Given the shopper has "Blue Top" with a quantity of 1 in the cart
+    When the shopper adds "Blue Top" with a quantity of 2 and opens the cart
+    Then the cart shows only "Blue Top" with a quantity of 3
+    And the cart shows a unit price of "Rs. 500" and a subtotal of "Rs. 1500" for "Blue Top"

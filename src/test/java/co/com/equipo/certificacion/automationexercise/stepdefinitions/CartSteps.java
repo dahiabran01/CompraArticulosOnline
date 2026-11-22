@@ -85,7 +85,7 @@ public class CartSteps {
     public void verifyCartQuantity(String product, int quantity) {
         actor().should(seeThat(TheCart.quantityOf(product), equalTo(quantity))
                 .orComplainWith(CartContentMismatch.class,
-                        "AC08/AC10/AC18/AC22/AC23/AC25: la cantidad del producto en el carrito no coincide con la esperada"));
+                        "AC08/AC10/AC18/AC22/AC23/AC25/AC30: la cantidad del producto en el carrito no coincide con la esperada"));
     }
 
     @Then("the cart shows a unit price of {string} and a subtotal of {string} for {string}")
@@ -93,10 +93,10 @@ public class CartSteps {
         actor().should(
                 seeThat(TheCart.unitPriceOf(product), equalTo(Money.rupees(unitPrice)))
                         .orComplainWith(CartContentMismatch.class,
-                                "AC08/AC18/AC22/AC25: el precio unitario en el carrito no coincide con el esperado"),
+                                "AC08/AC18/AC22/AC25/AC30: el precio unitario en el carrito no coincide con el esperado"),
                 seeThat(TheCart.subtotalOf(product), equalTo(Money.rupees(subtotal)))
                         .orComplainWith(CartContentMismatch.class,
-                                "AC08/AC18/AC22/AC25: el subtotal en el carrito no coincide con el esperado"));
+                                "AC08/AC18/AC22/AC25/AC30: el subtotal en el carrito no coincide con el esperado"));
     }
 
     @Then("the cart displays {string}")
@@ -109,7 +109,7 @@ public class CartSteps {
     public void verifyOnlyCartItem(String product, int quantity) {
         actor().should(seeThat(TheCart.productNames(), contains(product))
                 .orComplainWith(CartContentMismatch.class,
-                        "AC10/AC18/AC22/AC23/AC25: el carrito no contiene unicamente el producto esperado"));
+                        "AC10/AC18/AC22/AC23/AC25/AC30: el carrito no contiene unicamente el producto esperado"));
         verifyCartQuantity(product, quantity);
     }
 }
