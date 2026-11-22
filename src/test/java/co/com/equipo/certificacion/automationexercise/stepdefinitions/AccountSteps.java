@@ -186,4 +186,26 @@ public class AccountSteps {
         verifyText(AccountPage.LOGIN_ERROR, message, AccountStateMismatch.class,
                 "AC04/AC16: no se mostro el mensaje esperado de credenciales invalidas");
     }
+
+    @When("the shopper submits the registration details without a password")
+    public void registerWithoutPassword() {
+        actor().attemptsTo(RegisterAccount.withoutPasswordFor(Shopper.newAccount()));
+    }
+
+    @Then("the registration password is required and the account is not created")
+    public void verifyMissingRegistrationPassword() {
+        actor().should(
+                seeThat(TheShopper.isMissingRegistrationPassword(), is(true))
+                        .orComplainWith(AccountStateMismatch.class,
+                                "AC29: el campo de contrasena en registro no se marco como obligatorio e invalido"),
+                seeThat(TheShopper.isRegistrationFormVisible(), is(true))
+                        .orComplainWith(AccountStateMismatch.class,
+                                "AC29: el formulario de registro dejo de estar visible al enviar sin contrasena"),
+                seeThat(TheShopper.isAccountCreatedVisible(), is(false))
+                        .orComplainWith(AccountStateMismatch.class,
+                                "AC29: se mostro confirmacion de cuenta creada pese a omitir la contrasena"),
+                seeThat(TheShopper.isSignedIn(), is(false))
+                        .orComplainWith(AccountStateMismatch.class,
+                                "AC29: el comprador quedo autenticado pese a no crear la cuenta"));
+    }
 }

@@ -48,3 +48,9 @@ Feature: Shopper accounts
     Given the shopper is on the sign-up page
     When the shopper submits the sign-in form with an email and no password
     Then the password is required and the shopper remains signed out
+
+  @AC29 @negative @boundary
+  Scenario: Block account creation when the required password is empty
+    Given the shopper is on the sign-up page
+    When the shopper submits the registration details without a password
+    Then the registration password is required and the account is not created

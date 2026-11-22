@@ -37,5 +37,20 @@ public final class TheShopper {
         return Question.about("whether the sign-in password is invalid as required")
                 .answeredBy(actor -> AccountPage.MISSING_LOGIN_PASSWORD.isVisibleFor(actor));
     }
+
+    public static Question<Boolean> isMissingRegistrationPassword() {
+        return Question.about("whether the registration password is invalid as required")
+                .answeredBy(actor -> AccountPage.MISSING_REGISTRATION_PASSWORD.isVisibleFor(actor));
+    }
+
+    public static Question<Boolean> isRegistrationFormVisible() {
+        return Question.about("whether the registration form is visible")
+                .answeredBy(actor -> AccountPage.CREATE.isVisibleFor(actor));
+    }
+
+    public static Question<Boolean> isAccountCreatedVisible() {
+        return Question.about("whether the account confirmation is visible")
+                .answeredBy(actor -> AccountPage.CREATED.isVisibleFor(actor));
+    }
 }
 

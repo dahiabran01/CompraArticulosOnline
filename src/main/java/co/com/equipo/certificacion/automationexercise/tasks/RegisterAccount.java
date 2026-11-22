@@ -20,13 +20,29 @@ import static net.serenitybdd.screenplay.matchers.WebElementStateMatchers.isVisi
  */
 public class RegisterAccount implements Task {
     private final Shopper shopper;
+    private final boolean includePassword;
+    private final String actionDescription;
 
-    public RegisterAccount(Shopper shopper) {
+    public RegisterAccount(Shopper shopper, boolean includePassword, String actionDescription) {
         this.shopper = shopper;
+        this.includePassword = includePassword;
+        this.actionDescription = actionDescription;
     }
 
     public static RegisterAccount forShopper(Shopper shopper) {
-        return Tasks.instrumented(RegisterAccount.class, shopper);
+        return Tasks.instrumented(
+                RegisterAccount.class,
+                shopper,
+                true,
+                "creates a new shopper account");
+    }
+
+    public static RegisterAccount withoutPasswordFor(Shopper shopper) {
+        return Tasks.instrumented(
+                RegisterAccount.class,
+                shopper,
+                false,
+                "submits registration details without a password");
     }
 
     public static Performable startFor(Shopper shopper) {
@@ -41,12 +57,15 @@ public class RegisterAccount implements Task {
     }
 
     @Override
-    @Step("{0} creates a new shopper account")
+    @Step("{0} #actionDescription")
     public <T extends Actor> void performAs(T actor) {
         actor.attemptsTo(
                 startFor(shopper),
-                WaitUntil.the(AccountPage.PASSWORD, isVisible()).forNoMoreThan(WaitTimeouts.seconds()).seconds(),
-                TypeWhenReady.theSecret(shopper.password()).into(AccountPage.PASSWORD),
+                WaitUntil.the(AccountPage.PASSWORD, isVisible()).forNoMoreThan(WaitTimeouts.seconds()).seconds());
+        if (includePassword) {
+            actor.attemptsTo(TypeWhenReady.theSecret(shopper.password()).into(AccountPage.PASSWORD));
+        }
+        actor.attemptsTo(
                 TypeWhenReady.theValue(shopper.firstName()).into(AccountPage.FIRST_NAME),
                 TypeWhenReady.theValue(shopper.lastName()).into(AccountPage.LAST_NAME),
                 TypeWhenReady.theValue(shopper.street()).into(AccountPage.STREET),
