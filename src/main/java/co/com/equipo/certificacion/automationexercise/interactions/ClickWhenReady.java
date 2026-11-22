@@ -16,6 +16,10 @@ import static net.serenitybdd.screenplay.matchers.WebElementStateMatchers.isClic
 
 /**
  * Espera a que un elemento sea clicable y realiza un unico reintento centrado si otro elemento lo tapa.
+ *
+ * <p>Usa {@code target.resolveFor(actor).click()} en lugar de {@code Click.on(target)} para aislar el
+ * reintento unico ante {@link ElementClickInterceptedException} sin que Serenity registre el primer
+ * intento interceptado como un subpaso fallido interno, manteniendo las capturas por accion.
  */
 public class ClickWhenReady implements Interaction {
     private final Target target;
