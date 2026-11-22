@@ -14,6 +14,11 @@ import static org.hamcrest.Matchers.equalToIgnoringCase;
 final class ShopAssertions {
     private ShopAssertions() {}
 
+    /**
+     * Verifica que el texto visible del objetivo coincida con lo esperado y exige que
+     * {@code message} empiece con el prefijo {@code AC##:} para su clasificacion en consola
+     * como {@code REGLA_DE_NEGOCIO}.
+     */
     static void verifyText(
             Target target,
             String expected,
