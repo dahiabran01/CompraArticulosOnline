@@ -1,6 +1,7 @@
 package co.com.equipo.certificacion.automationexercise.utils;
 
 import co.com.equipo.certificacion.automationexercise.exceptions.CheckoutDataMismatch;
+import co.com.equipo.certificacion.automationexercise.exceptions.ShopExpectationError;
 import co.com.equipo.certificacion.automationexercise.utils.FailureDiagnosis.Diagnosis;
 import org.junit.Test;
 
@@ -11,18 +12,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 
 public class FailureDiagnosisTest {
-    private static class ShopExpectationError extends AssertionError {
-        ShopExpectationError(String message) {
-            super(message);
-        }
-    }
-
-    private static final class OrderTotalMismatch extends ShopExpectationError {
-        OrderTotalMismatch(String message) {
-            super(message);
-        }
-    }
-
     private static final class ElementClickInterceptedException extends RuntimeException {
         ElementClickInterceptedException(String message) {
             super(message);
@@ -69,7 +58,9 @@ public class FailureDiagnosisTest {
     @Test
     public void classifiesShopExpectationErrorBeforeGenericAssertionError() {
         // Arrange
-        Throwable error = new OrderTotalMismatch("AC11: total esperado Rs. 1000 pero fue Rs. 500");
+        ShopExpectationError error = new CheckoutDataMismatch(
+                "AC11: total esperado Rs. 1000 pero fue Rs. 500",
+                new AssertionError("mismatch"));
 
         // Act
         Diagnosis diagnosis = FailureDiagnosis.of(error);
