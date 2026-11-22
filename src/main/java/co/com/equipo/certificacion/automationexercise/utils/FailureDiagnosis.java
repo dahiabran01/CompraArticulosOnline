@@ -27,6 +27,13 @@ public final class FailureDiagnosis {
      * Analiza la cadena de causas de una excepcion y devuelve el diagnostico segun prioridad fija.
      */
     public static Diagnosis of(Throwable error) {
+        return of(error, null);
+    }
+
+    /**
+     * Analiza la cadena de causas junto con texto visible de la pagina para distinguir saturacion del sitio.
+     */
+    public static Diagnosis of(Throwable error, String pageContext) {
         if (error == null) {
             return new Diagnosis(
                     "SIN_ERROR",
@@ -37,6 +44,14 @@ public final class FailureDiagnosis {
 
         List<Throwable> chain = collectCauseChain(error);
         String detail = extractDetail(chain);
+
+        if (isSiteOverloadedText(pageContext)) {
+            return new Diagnosis(
+                    "SITIO_NO_DISPONIBLE",
+                    "El sitio publico respondio con sobrecarga temporal (heavy load / queue full)",
+                    "Reintentar la ejecucion; es una saturacion temporal de automationexercise.com, no un defecto de la prueba",
+                    detail);
+        }
 
         for (Throwable cause : chain) {
             if (isShopExpectationError(cause) || isErrorTallyBusinessRuleAssertion(cause)) {
@@ -188,6 +203,14 @@ public final class FailureDiagnosis {
                 || lower.contains("an element that is present")
                 || lower.contains("element should be")
                 || lower.contains("expected condition failed: waiting for");
+    }
+
+    private static boolean isSiteOverloadedText(String text) {
+        if (text == null || text.isBlank()) {
+            return false;
+        }
+        String lower = text.toLowerCase(Locale.ROOT);
+        return lower.contains("under heavy load") || lower.contains("queue full");
     }
 
     private static boolean isNetworkError(String simpleName, String message) {

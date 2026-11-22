@@ -262,5 +262,35 @@ public class FailureDiagnosisTest {
         assertThat(diagnosis.detail(), is(equalTo(
                 "Expected: a string equal to \"Rs. 9999\" ignoring case | but: was \"Rs. 1000\"")));
     }
+
+    @Test
+    public void classifiesSiteOverloadPageContextAsUnavailableSiteBeforeBusinessRule() {
+        // Arrange
+        Throwable error = new CheckoutDataMismatch(
+                "AC27: el resumen del pedido no lista exactamente los productos agregados",
+                new AssertionError("empty"));
+
+        // Act
+        Diagnosis diagnosis = FailureDiagnosis.of(error, "This website is under heavy load (queue full)");
+
+        // Assert
+        assertThat(diagnosis.category(), is(equalTo("SITIO_NO_DISPONIBLE")));
+        assertThat(diagnosis.probableCause(), containsString("heavy load"));
+    }
+
+    @Test
+    public void keepsBusinessRuleDiagnosisWhenPageContextIsNormal() {
+        // Arrange
+        Throwable error = new CheckoutDataMismatch(
+                "AC27: el total del pedido no coincide",
+                new AssertionError("mismatch"));
+
+        // Act
+        Diagnosis diagnosis = FailureDiagnosis.of(error, "Automation Exercise - Checkout");
+
+        // Assert
+        assertThat(diagnosis.category(), is(equalTo("REGLA_DE_NEGOCIO")));
+        assertThat(diagnosis.probableCause(), containsString("AC27: el total del pedido no coincide"));
+    }
 }
 

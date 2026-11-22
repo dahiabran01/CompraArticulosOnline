@@ -1,5 +1,6 @@
 package co.com.equipo.certificacion.automationexercise.utils;
 
+import co.com.equipo.certificacion.automationexercise.questions.TheSite;
 import co.com.equipo.certificacion.automationexercise.utils.FailureDiagnosis.Diagnosis;
 import io.cucumber.plugin.ConcurrentEventListener;
 import io.cucumber.plugin.event.EventPublisher;
@@ -17,6 +18,10 @@ import io.cucumber.plugin.event.TestSourceRead;
 import io.cucumber.plugin.event.TestStep;
 import io.cucumber.plugin.event.TestStepFinished;
 import io.cucumber.plugin.event.TestStepStarted;
+import net.serenitybdd.screenplay.Actor;
+import net.serenitybdd.screenplay.abilities.BrowseTheWeb;
+import net.serenitybdd.screenplay.actors.OnStage;
+import net.thucydides.core.webdriver.ThucydidesWebDriverSupport;
 
 import java.net.URI;
 import java.time.Duration;
@@ -135,7 +140,7 @@ public final class ExecutionProgressReporter implements ConcurrentEventListener 
             ConsoleOutput.line("   " + currentStep + "/" + totalSteps + " " + coloredLabel + " " + stepText + "  " + duration);
 
             if (status == Status.FAILED) {
-                Diagnosis diagnosis = FailureDiagnosis.of(result.getError());
+                Diagnosis diagnosis = FailureDiagnosis.of(result.getError(), readOverloadNoticeSafely());
                 if (state != null) {
                     state.recordDiagnosisIfAbsent(diagnosis);
                 }
@@ -146,7 +151,7 @@ public final class ExecutionProgressReporter implements ConcurrentEventListener 
         }
 
         if (event.getTestStep() instanceof HookTestStep hookStep && status == Status.FAILED) {
-            Diagnosis diagnosis = FailureDiagnosis.of(result.getError());
+            Diagnosis diagnosis = FailureDiagnosis.of(result.getError(), readOverloadNoticeSafely());
             if (state != null) {
                 state.recordDiagnosisIfAbsent(diagnosis);
             }
@@ -156,6 +161,23 @@ public final class ExecutionProgressReporter implements ConcurrentEventListener 
                     ? hookStep.getCodeLocation()
                     : fileNameOf(event.getTestCase().getUri()) + ":" + event.getTestCase().getLocation().getLine();
             printDiagnosis(diagnosis, location);
+        }
+    }
+
+    private static String readOverloadNoticeSafely() {
+        if (!OnStage.theStageIsSet() || !ThucydidesWebDriverSupport.isDriverInstantiated()) {
+            return "";
+        }
+        try {
+            Actor actor = OnStage.theActorInTheSpotlight();
+            if (actor == null || actor.abilityTo(BrowseTheWeb.class) == null) {
+                return "";
+            }
+            return TheSite.overloadNotice().answeredBy(actor);
+        } catch (RuntimeException error) {
+            System.err.println("[ExecutionProgressReporter] Error leyendo pagina ("
+                    + error.getClass().getSimpleName() + "): " + error.getMessage());
+            return "";
         }
     }
 
