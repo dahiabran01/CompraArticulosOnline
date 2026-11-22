@@ -2,11 +2,16 @@
 Feature: Product catalog
   A shopper can search for a product and review its details before buying.
 
-  @AC05 @happy
-  Scenario: Find a product by name
+  @AC05 @happy @boundary
+  Scenario Outline: Find a product by name regardless of letter case
     Given the shopper is viewing the product catalog
-    When the shopper searches for "Blue Top"
+    When the shopper searches for "<query>"
     Then the search results include "Blue Top"
+
+    Examples:
+      | query    |
+      | Blue Top |
+      | blue top |
 
   @AC06 @negative
   Scenario: Search for a product that does not exist
