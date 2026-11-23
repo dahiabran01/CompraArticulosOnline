@@ -1,15 +1,24 @@
 package co.com.equipo.certificacion.automationexercise.stepdefinitions;
 
+import co.com.equipo.certificacion.automationexercise.exceptions.AccountStateMismatch;
+import co.com.equipo.certificacion.automationexercise.exceptions.CheckoutDataMismatch;
+import co.com.equipo.certificacion.automationexercise.exceptions.OrderNotConfirmed;
+import co.com.equipo.certificacion.automationexercise.models.PaymentCard;
 import co.com.equipo.certificacion.automationexercise.models.Shopper;
-import co.com.equipo.certificacion.automationexercise.questions.DisplayedText;
+import co.com.equipo.certificacion.automationexercise.questions.TheCart;
+import co.com.equipo.certificacion.automationexercise.questions.TheOrder;
+import co.com.equipo.certificacion.automationexercise.questions.TheOrderConfirmation;
 import co.com.equipo.certificacion.automationexercise.tasks.CompleteCheckout;
+import co.com.equipo.certificacion.automationexercise.tasks.PayForOrder;
 import co.com.equipo.certificacion.automationexercise.userinterfaces.AccountPage;
 import co.com.equipo.certificacion.automationexercise.userinterfaces.CartPage;
-import co.com.equipo.certificacion.automationexercise.userinterfaces.CheckoutPage;
 import co.com.equipo.certificacion.automationexercise.userinterfaces.Shop;
+import co.com.equipo.certificacion.automationexercise.utils.Money;
+import co.com.equipo.certificacion.automationexercise.utils.WaitTimeouts;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import net.serenitybdd.screenplay.targets.Target;
+import net.serenitybdd.screenplay.Consequence;
+import net.serenitybdd.screenplay.Question;
 import net.serenitybdd.screenplay.waits.WaitUntil;
 
 import static co.com.equipo.certificacion.automationexercise.interactions.ClickWhenReady.on;
@@ -18,12 +27,14 @@ import static co.com.equipo.certificacion.automationexercise.stepdefinitions.Sho
 import static co.com.equipo.certificacion.automationexercise.stepdefinitions.ShopperSession.registeredAccount;
 import static net.serenitybdd.screenplay.GivenWhenThen.seeThat;
 import static net.serenitybdd.screenplay.matchers.WebElementStateMatchers.isNotVisible;
-import static net.serenitybdd.screenplay.matchers.WebElementStateMatchers.isVisible;
-import static net.serenitybdd.screenplay.questions.WebElementQuestion.the;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.equalToIgnoringCase;
+import static org.hamcrest.Matchers.is;
 
 public class CheckoutSteps {
     @When("the shopper proceeds to checkout")
@@ -38,73 +49,96 @@ public class CheckoutSteps {
 
     @Then("checkout shows the shopper's registered delivery address")
     public void verifyDeliveryAddress() {
-        verifyRegisteredAddress(CheckoutPage.DELIVERY_ADDRESS);
+        verifyRegisteredAddress(TheOrder.deliveryAddress(),
+                "AC11/AC19/AC26: la direccion de entrega en checkout no coincide con la registrada");
     }
 
     @Then("checkout shows the shopper's registered delivery and billing addresses")
     public void verifyDeliveryAndBillingAddresses() {
         verifyDeliveryAddress();
-        verifyRegisteredAddress(CheckoutPage.BILLING_ADDRESS);
+        verifyRegisteredAddress(TheOrder.billingAddress(),
+                "AC19: la direccion de facturacion en checkout no coincide con la registrada");
     }
 
-    private void verifyRegisteredAddress(Target address) {
+    private void verifyRegisteredAddress(Question<String> addressQuestion, String message) {
         Shopper shopper = registeredAccount();
-        actor().attemptsTo(WaitUntil.the(address, isVisible()));
-        actor().should(seeThat(DisplayedText.of(address), allOf(
-                containsString(shopper.displayName()), containsString(shopper.street()),
-                containsString(shopper.city()), containsString(shopper.state()),
-                containsString(shopper.postcode()), containsString(shopper.country()),
-                containsString(shopper.mobile()))));
+        actor().should(seeThat(addressQuestion, allOf(
+                        containsString(shopper.displayName()), containsString(shopper.street()),
+                        containsString(shopper.city()), containsString(shopper.state()),
+                        containsString(shopper.postcode()), containsString(shopper.country()),
+                        containsString(shopper.mobile())))
+                .orComplainWith(CheckoutDataMismatch.class, message));
     }
 
     @Then("the order summary lists only {string} with a quantity of {int} and a subtotal of {string}")
     public void verifySingleOrderProduct(String product, int quantity, String subtotal) {
-        actor().should(seeThat(DisplayedText.ofAll(CartPage.PRODUCT_NAMES), contains(product)));
+        actor().should(seeThat(TheCart.productNames(), contains(product))
+                .orComplainWith(CheckoutDataMismatch.class,
+                        "AC11/AC19/AC26: el resumen del pedido no lista unicamente el producto esperado"));
         verifyOrderLine(product, quantity, subtotal);
     }
 
     @Then("the order summary lists only {string} and {string}")
     public void verifyOrderProducts(String firstProduct, String secondProduct) {
-        actor().should(seeThat(DisplayedText.ofAll(CartPage.PRODUCT_NAMES),
-                containsInAnyOrder(firstProduct, secondProduct)));
+        actor().should(seeThat(TheCart.productNames(), containsInAnyOrder(firstProduct, secondProduct))
+                .orComplainWith(CheckoutDataMismatch.class,
+                        "AC14/AC27: el resumen del pedido no lista exactamente los productos agregados"));
     }
 
     @Then("the order summary shows {string} with a quantity of {int} and a subtotal of {string}")
     public void verifyOrderLine(String product, int quantity, String subtotal) {
-        verifyText(CartPage.QUANTITY.of(product), Integer.toString(quantity));
-        verifyText(CartPage.SUBTOTAL.of(product), subtotal);
+        actor().should(
+                orderLineQuantityIs(product, quantity),
+                seeThat(TheCart.subtotalOf(product), equalTo(Money.rupees(subtotal)))
+                        .orComplainWith(CheckoutDataMismatch.class,
+                                "AC11/AC14/AC19/AC26: el subtotal en el resumen del pedido no coincide con el esperado"));
     }
 
     @Then("the order total is {string}")
     public void verifyOrderTotal(String total) {
-        verifyText(CheckoutPage.ORDER_TOTAL, total);
+        actor().should(seeThat(TheOrder.total(), equalToIgnoringCase(total))
+                .orComplainWith(CheckoutDataMismatch.class,
+                        "AC11/AC14/AC19/AC26: el total del pedido no coincide con lo agregado al carrito"));
     }
 
     @When("the shopper submits the order with test payment details")
     public void payForOrder() {
-        actor().attemptsTo(CompleteCheckout.payWithTestCard(registeredAccount().displayName()));
+        actor().attemptsTo(PayForOrder.with(PaymentCard.testCardFor(registeredAccount().displayName())));
     }
 
     @Then("the shop confirms that the order was placed")
     public void verifyOrderConfirmation() {
-        verifyText(CheckoutPage.ORDER_PLACED, "Order Placed!");
-        verifyText(CheckoutPage.CONFIRMATION, "Congratulations! Your order has been confirmed!");
+        actor().should(
+                seeThat(TheOrderConfirmation.title(), equalToIgnoringCase("Order Placed!"))
+                        .orComplainWith(OrderNotConfirmed.class,
+                                "AC12/AC26: no se mostro el titulo de confirmacion del pedido"),
+                seeThat(TheOrderConfirmation.message(),
+                        equalToIgnoringCase("Congratulations! Your order has been confirmed!"))
+                        .orComplainWith(OrderNotConfirmed.class,
+                                "AC12/AC26: no se mostro el mensaje de confirmacion del pedido"));
     }
 
     @Then("checkout prompts the shopper to register or sign in")
     public void verifyGuestCheckoutPrompt() {
-        verifyText(CartPage.REGISTER_OR_LOGIN, "Register / Login");
+        verifyText(CartPage.REGISTER_OR_LOGIN, "Register / Login", CheckoutDataMismatch.class,
+                "AC13/AC25: no se mostro el aviso para registrarse o iniciar sesion en checkout");
     }
 
     @When("the shopper chooses to continue on the cart")
     public void continueOnCart() {
-        actor().attemptsTo(on(CartPage.CONTINUE_ON_CART), WaitUntil.the(CartPage.REGISTER_OR_LOGIN, isNotVisible()));
+        actor().attemptsTo(on(CartPage.CONTINUE_ON_CART),
+                WaitUntil.the(CartPage.REGISTER_OR_LOGIN, isNotVisible()).forNoMoreThan(WaitTimeouts.seconds()).seconds());
     }
 
     @Then("the checkout prompt closes and the cart remains available")
     public void verifyReturnToCart() {
-        actor().should(seeThat(the(CartPage.REGISTER_OR_LOGIN), isNotVisible()),
-                seeThat(the(CartPage.PROCEED), isVisible()));
+        actor().should(
+                seeThat(TheCart.isGuestCheckoutPromptVisible(), is(false))
+                        .orComplainWith(CheckoutDataMismatch.class,
+                                "AC25: el modal de inicio de sesion no se cerro al continuar en el carrito"),
+                seeThat(TheCart.isCheckoutAvailable(), is(true))
+                        .orComplainWith(CheckoutDataMismatch.class,
+                                "AC25: el acceso al checkout no siguio disponible en el carrito"));
     }
 
     @When("the shopper follows the registration or sign-in link")
@@ -114,6 +148,49 @@ public class CheckoutSteps {
 
     @Then("the sign-up form displays the heading {string}")
     public void verifySignupHeading(String heading) {
-        verifyText(AccountPage.SIGNUP_TITLE, heading);
+        verifyText(AccountPage.SIGNUP_TITLE, heading, AccountStateMismatch.class,
+                "AC13: no se mostro el encabezado del formulario de registro");
+    }
+
+    @When("the shopper submits the order without a card number")
+    public void payWithoutCardNumber() {
+        actor().attemptsTo(PayForOrder.withoutCardNumber(PaymentCard.testCardFor(registeredAccount().displayName())));
+    }
+
+    @Then("the card number is required and the order is not placed")
+    public void verifyMissingCardNumber() {
+        actor().should(
+                seeThat(TheOrder.isMissingCardNumber(), is(true))
+                        .orComplainWith(CheckoutDataMismatch.class,
+                                "AC28: el campo numero de tarjeta no se marco como obligatorio e invalido"),
+                seeThat(TheOrder.isPaymentFormVisible(), is(true))
+                        .orComplainWith(CheckoutDataMismatch.class,
+                                "AC28: el formulario de pago dejo de estar visible al enviar sin numero de tarjeta"),
+                seeThat(TheOrderConfirmation.isDisplayed(), is(false))
+                        .orComplainWith(CheckoutDataMismatch.class,
+                                "AC28: se mostro confirmacion de pedido pese a omitir el numero de tarjeta"));
+    }
+
+    @Then("the order summary shows {string} with a quantity of {int}")
+    public void verifyOrderLineQuantity(String product, int quantity) {
+        actor().should(orderLineQuantityIs(product, quantity));
+    }
+
+    private Consequence<Integer> orderLineQuantityIs(String product, int quantity) {
+        return seeThat(TheCart.quantityOf(product), equalTo(quantity))
+                .orComplainWith(CheckoutDataMismatch.class,
+                        "AC11/AC14/AC19/AC26/AC27: la cantidad en el resumen del pedido no coincide con la esperada");
+    }
+
+    @Then("each order line subtotal matches unit price times quantity and the order total equals their sum")
+    public void verifyOrderCalculationRule() {
+        int expectedTotal = actor().asksFor(TheCart.sumOfSubtotals());
+        actor().should(
+                seeThat(TheCart.inconsistentItems(), empty())
+                        .orComplainWith(CheckoutDataMismatch.class,
+                                "AC27: el subtotal de alguna linea no coincide con precio unitario por cantidad"),
+                seeThat(TheOrder.totalAmount(), equalTo(expectedTotal))
+                        .orComplainWith(CheckoutDataMismatch.class,
+                                "AC27: el total del pedido no coincide con la suma de los subtotales de las lineas"));
     }
 }

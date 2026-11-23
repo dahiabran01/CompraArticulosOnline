@@ -1,24 +1,25 @@
 package co.com.equipo.certificacion.automationexercise.tasks;
 
+import co.com.equipo.certificacion.automationexercise.interactions.TypeWhenReady;
+import co.com.equipo.certificacion.automationexercise.userinterfaces.AccountPage;
 import net.serenitybdd.screenplay.Performable;
 import net.serenitybdd.screenplay.Task;
-import net.serenitybdd.screenplay.actions.Enter;
 
 import static co.com.equipo.certificacion.automationexercise.interactions.ClickWhenReady.on;
-import static co.com.equipo.certificacion.automationexercise.userinterfaces.AccountPage.*;
 
 public final class SignIn {
     private SignIn() {}
 
     public static Performable withoutPassword(String email) {
         return Task.where("{0} attempts to sign in without a password",
-                Enter.theValue(email).into(LOGIN_EMAIL), on(LOGIN_BUTTON));
+                TypeWhenReady.theValue(email).into(AccountPage.LOGIN_EMAIL),
+                on(AccountPage.LOGIN_BUTTON));
     }
 
     public static Performable with(String email, String password) {
         return Task.where("{0} signs in to the shop",
-                Enter.theValue(email).into(LOGIN_EMAIL),
-                Enter.theValue(password).into(LOGIN_PASSWORD),
-                on(LOGIN_BUTTON));
+                TypeWhenReady.theValue(email).into(AccountPage.LOGIN_EMAIL),
+                TypeWhenReady.theSecret(password).into(AccountPage.LOGIN_PASSWORD),
+                on(AccountPage.LOGIN_BUTTON));
     }
 }

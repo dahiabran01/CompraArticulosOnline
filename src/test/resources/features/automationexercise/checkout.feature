@@ -74,3 +74,28 @@ Feature: Checkout and order confirmation
     And the order total is "Rs. 500"
     When the shopper submits the order with test payment details
     Then the shop confirms that the order was placed
+
+  @AC28 @negative @boundary
+  Scenario: Block payment when the required card number is empty
+    Given the shopper is signed in with a new account
+    And the shopper adds "Blue Top" with a quantity of 1 and opens the cart
+    When the shopper proceeds to checkout
+    And the shopper submits the order without a card number
+    Then the card number is required and the order is not placed
+
+  @AC27 @boundary @happy
+  Scenario Outline: Order total follows the line subtotals
+    Given the shopper is signed in with a new account
+    And the shopper adds "Blue Top" with a quantity of <q1> and opens the cart
+    And the shopper adds "Men Tshirt" with a quantity of <q2> and opens the cart
+    When the shopper proceeds to checkout
+    Then the order summary lists only "Blue Top" and "Men Tshirt"
+    And the order summary shows "Blue Top" with a quantity of <q1>
+    And the order summary shows "Men Tshirt" with a quantity of <q2>
+    And each order line subtotal matches unit price times quantity and the order total equals their sum
+
+    Examples:
+      | q1 | q2 |
+      | 1  | 1  |
+      | 3  | 2  |
+      | 10 | 1  |

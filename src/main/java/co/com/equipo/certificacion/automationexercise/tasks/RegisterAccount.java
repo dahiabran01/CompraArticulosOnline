@@ -1,43 +1,79 @@
 package co.com.equipo.certificacion.automationexercise.tasks;
 
+import co.com.equipo.certificacion.automationexercise.interactions.SelectWhenReady;
+import co.com.equipo.certificacion.automationexercise.interactions.TypeWhenReady;
 import co.com.equipo.certificacion.automationexercise.models.Shopper;
+import co.com.equipo.certificacion.automationexercise.userinterfaces.AccountPage;
+import co.com.equipo.certificacion.automationexercise.utils.WaitTimeouts;
+import net.serenitybdd.annotations.Step;
+import net.serenitybdd.screenplay.Actor;
 import net.serenitybdd.screenplay.Performable;
 import net.serenitybdd.screenplay.Task;
-import net.serenitybdd.screenplay.actions.Enter;
-import net.serenitybdd.screenplay.actions.SelectFromOptions;
+import net.serenitybdd.screenplay.Tasks;
 import net.serenitybdd.screenplay.waits.WaitUntil;
 
 import static co.com.equipo.certificacion.automationexercise.interactions.ClickWhenReady.on;
-import static co.com.equipo.certificacion.automationexercise.userinterfaces.AccountPage.*;
 import static net.serenitybdd.screenplay.matchers.WebElementStateMatchers.isVisible;
 
-public final class RegisterAccount {
-    private RegisterAccount() {}
+/**
+ * Registra una nueva cuenta de comprador completando el formulario inicial y el perfil completo.
+ */
+public class RegisterAccount implements Task {
+    private final Shopper shopper;
+    private final boolean includePassword;
+    private final String actionDescription;
+
+    public RegisterAccount(Shopper shopper, boolean includePassword, String actionDescription) {
+        this.shopper = shopper;
+        this.includePassword = includePassword;
+        this.actionDescription = actionDescription;
+    }
+
+    public static RegisterAccount forShopper(Shopper shopper) {
+        return Tasks.instrumented(
+                RegisterAccount.class,
+                shopper,
+                true,
+                "creates a new shopper account");
+    }
+
+    public static RegisterAccount withoutPasswordFor(Shopper shopper) {
+        return Tasks.instrumented(
+                RegisterAccount.class,
+                shopper,
+                false,
+                "submits registration details without a password");
+    }
 
     public static Performable startFor(Shopper shopper) {
         return Task.where("{0} submits the shopper's name and email",
-                Enter.theValue(shopper.displayName()).into(SIGNUP_NAME),
-                Enter.theValue(shopper.email()).into(SIGNUP_EMAIL),
-                on(SIGNUP_BUTTON));
-    }
-
-    public static Performable forShopper(Shopper shopper) {
-        return Task.where("{0} creates a new shopper account",
-                startFor(shopper),
-                WaitUntil.the(PASSWORD, isVisible()),
-                Enter.theValue(shopper.password()).into(PASSWORD),
-                Enter.theValue(shopper.firstName()).into(FIRST_NAME),
-                Enter.theValue(shopper.lastName()).into(LAST_NAME),
-                Enter.theValue(shopper.street()).into(STREET),
-                SelectFromOptions.byVisibleText(shopper.country()).from(COUNTRY),
-                Enter.theValue(shopper.state()).into(STATE),
-                Enter.theValue(shopper.city()).into(CITY),
-                Enter.theValue(shopper.postcode()).into(POSTCODE),
-                Enter.theValue(shopper.mobile()).into(MOBILE),
-                on(CREATE));
+                TypeWhenReady.theValue(shopper.displayName()).into(AccountPage.SIGNUP_NAME),
+                TypeWhenReady.theValue(shopper.email()).into(AccountPage.SIGNUP_EMAIL),
+                on(AccountPage.SIGNUP_BUTTON));
     }
 
     public static Performable continueShopping() {
-        return Task.where("{0} continues from the account confirmation", on(CONTINUE));
+        return Task.where("{0} continues from the account confirmation", on(AccountPage.CONTINUE));
+    }
+
+    @Override
+    @Step("{0} #actionDescription")
+    public <T extends Actor> void performAs(T actor) {
+        actor.attemptsTo(
+                startFor(shopper),
+                WaitUntil.the(AccountPage.PASSWORD, isVisible()).forNoMoreThan(WaitTimeouts.seconds()).seconds());
+        if (includePassword) {
+            actor.attemptsTo(TypeWhenReady.theSecret(shopper.password()).into(AccountPage.PASSWORD));
+        }
+        actor.attemptsTo(
+                TypeWhenReady.theValue(shopper.firstName()).into(AccountPage.FIRST_NAME),
+                TypeWhenReady.theValue(shopper.lastName()).into(AccountPage.LAST_NAME),
+                TypeWhenReady.theValue(shopper.street()).into(AccountPage.STREET),
+                SelectWhenReady.option(shopper.country()).from(AccountPage.COUNTRY),
+                TypeWhenReady.theValue(shopper.state()).into(AccountPage.STATE),
+                TypeWhenReady.theValue(shopper.city()).into(AccountPage.CITY),
+                TypeWhenReady.theValue(shopper.postcode()).into(AccountPage.POSTCODE),
+                TypeWhenReady.theValue(shopper.mobile()).into(AccountPage.MOBILE),
+                on(AccountPage.CREATE));
     }
 }

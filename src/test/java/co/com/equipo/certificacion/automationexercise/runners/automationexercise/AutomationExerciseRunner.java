@@ -8,7 +8,7 @@ import org.junit.runner.RunWith;
 @CucumberOptions(
         features = "classpath:features/automationexercise",
         glue = "co.com.equipo.certificacion.automationexercise.stepdefinitions",
-        plugin = "pretty",
+        plugin = {"co.com.equipo.certificacion.automationexercise.utils.ExecutionProgressReporter"},
         snippets = CucumberOptions.SnippetType.CAMELCASE
 )
 public class AutomationExerciseRunner {}

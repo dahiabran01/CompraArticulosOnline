@@ -3,7 +3,7 @@ Feature: Shopping cart
   A shopper can add the intended quantity and remove products before checkout.
 
   @AC08 @happy
-  Scenario Outline: Add Blue Top to the cart with quantity <quantity>
+  Scenario Outline: Add Blue Top to the cart in the chosen quantity
     Given the shopper has an empty cart
     When the shopper adds "Blue Top" with a quantity of <quantity> and opens the cart
     Then the cart shows "Blue Top" with a quantity of <quantity>
@@ -55,3 +55,10 @@ Feature: Shopping cart
     When the shopper opens the details for "Blue Top"
     And the shopper adds the displayed product without changing its quantity
     Then the cart shows only "Blue Top" with a quantity of 1
+
+  @AC30 @boundary @alternate
+  Scenario: Accumulate quantity when adding the same product twice
+    Given the shopper has "Blue Top" with a quantity of 1 in the cart
+    When the shopper adds "Blue Top" with a quantity of 2 and opens the cart
+    Then the cart shows only "Blue Top" with a quantity of 3
+    And the cart shows a unit price of "Rs. 500" and a subtotal of "Rs. 1500" for "Blue Top"

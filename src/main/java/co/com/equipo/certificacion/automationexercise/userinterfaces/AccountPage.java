@@ -16,6 +16,8 @@ public final class AccountPage {
     public static final Target LOGIN_BUTTON = field("login-button");
     public static final Target LOGIN_ERROR = Target.the("sign-in error").locatedBy(".login-form form p");
     public static final Target PASSWORD = field("password");
+    public static final Target MISSING_REGISTRATION_PASSWORD = Target.the("required empty registration password")
+            .locatedBy("css:[data-qa='password']:required:invalid");
     public static final Target FIRST_NAME = field("first_name");
     public static final Target LAST_NAME = field("last_name");
     public static final Target STREET = field("address");

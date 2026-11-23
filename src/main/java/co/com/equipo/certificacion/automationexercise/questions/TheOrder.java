@@ -1,0 +1,54 @@
+package co.com.equipo.certificacion.automationexercise.questions;
+
+import co.com.equipo.certificacion.automationexercise.userinterfaces.CheckoutPage;
+import co.com.equipo.certificacion.automationexercise.utils.Money;
+import co.com.equipo.certificacion.automationexercise.utils.WaitTimeouts;
+import net.serenitybdd.screenplay.Question;
+import net.serenitybdd.screenplay.targets.Target;
+
+import java.time.Duration;
+
+/**
+ * Preguntas de negocio sobre las direcciones y el total mostrados en checkout.
+ */
+public final class TheOrder {
+    private TheOrder() {}
+
+    public static Question<String> total() {
+        return normalizedText("order total", CheckoutPage.ORDER_TOTAL);
+    }
+
+    public static Question<Integer> totalAmount() {
+        return Question.about("order total amount")
+                .answeredBy(actor -> Money.rupees(total().answeredBy(actor)));
+    }
+
+    public static Question<String> deliveryAddress() {
+        return normalizedText("delivery address", CheckoutPage.DELIVERY_ADDRESS);
+    }
+
+    public static Question<String> billingAddress() {
+        return normalizedText("billing address", CheckoutPage.BILLING_ADDRESS);
+    }
+
+    public static Question<Boolean> isMissingCardNumber() {
+        return Question.about("whether the card number is invalid as required")
+                .answeredBy(actor -> CheckoutPage.MISSING_CARD_NUMBER.isVisibleFor(actor));
+    }
+
+    public static Question<Boolean> isPaymentFormVisible() {
+        return Question.about("whether the payment form is visible")
+                .answeredBy(actor -> CheckoutPage.PAY.isVisibleFor(actor));
+    }
+
+    private static Question<String> normalizedText(String label, Target target) {
+        return Question.about(label).answeredBy(actor -> target
+                .waitingForNoMoreThan(Duration.ofSeconds(WaitTimeouts.seconds()))
+                .resolveFor(actor)
+                .waitUntilVisible()
+                .getText()
+                .replaceAll("[\\s\\u00a0]+", " ")
+                .trim());
+    }
+}
+

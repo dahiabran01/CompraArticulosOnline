@@ -32,26 +32,66 @@ tasks.withType(JavaCompile).configureEach {
 
 def selectedRunner = providers.gradleProperty('runner').orElse('AutomationExerciseRunner')
 
-tasks.named('test') {
-    useJUnit()
-    filter {
-        includeTestsMatching "*.${selectedRunner.get()}"
-    }
+def configureE2E = { Test task ->
+    task.group = 'verification'
+    task.testClassesDirs = sourceSets.test.output.classesDirs
+    task.classpath = sourceSets.test.runtimeClasspath
+    task.useJUnit()
     System.properties.each { key, value ->
         if (key.startsWith('cucumber.') || key.startsWith('webdriver.') ||
-                key.startsWith('serenity.') || key == 'demo.delay' || key == 'headless.mode') {
-            systemProperty key, value
+                key.startsWith('serenity.') || key.startsWith('progress.') ||
+                key == 'demo.delay' || key == 'headless.mode') {
+            task.systemProperty key, value
         }
     }
-    jvmArgs '-Dfile.encoding=UTF-8'
-    outputs.upToDateWhen { false }
-    testLogging {
+    task.jvmArgs '-Dfile.encoding=UTF-8'
+    task.outputs.upToDateWhen { false }
+    task.testLogging {
         events 'passed', 'skipped', 'failed'
         exceptionFormat = 'full'
+        showStandardStreams = true
+    }
+}
+
+tasks.named('test', Test) {
+    configureE2E(it)
+    filter {
+        includeTestsMatching "*.${selectedRunner.get()}"
     }
     if (!Boolean.getBoolean('cucumber.execution.dry-run')) {
         finalizedBy 'aggregate'
     }
+}
+
+tasks.register('demo', Test) {
+    description = 'Runs the two end-to-end purchase scenarios with visible demo pauses and generates the Serenity report.'
+    dependsOn 'clearReports'
+    configureE2E(it)
+    filter {
+        includeTestsMatching '*.PurchaseRunner'
+    }
+    systemProperty 'demo.delay', System.getProperty('demo.delay', '1500')
+    finalizedBy 'aggregate'
+}
+
+tasks.register('unitTest', Test) {
+    description = 'Runs pure unit tests without launching a browser.'
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnit()
+    filter {
+        includeTestsMatching '*Test'
+    }
+    jvmArgs '-Dfile.encoding=UTF-8'
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        exceptionFormat = 'full'
+    }
+}
+
+tasks.named('check') {
+    dependsOn 'unitTest'
 }
 
 tasks.named('clean') {

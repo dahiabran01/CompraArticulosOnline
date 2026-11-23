@@ -9,6 +9,6 @@ import org.junit.runner.RunWith;
         features = "classpath:features/automationexercise/checkout.feature",
         glue = "co.com.equipo.certificacion.automationexercise.stepdefinitions",
         tags = "@e2e",
-        plugin = "pretty"
+        plugin = {"co.com.equipo.certificacion.automationexercise.utils.ExecutionProgressReporter"}
 )
 public class PurchaseRunner {}
