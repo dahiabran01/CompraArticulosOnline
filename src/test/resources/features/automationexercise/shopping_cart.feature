@@ -3,7 +3,7 @@ Feature: Shopping cart
   A shopper can add the intended quantity and remove products before checkout.
 
   @AC08 @happy
-  Scenario Outline: Add Blue Top to the cart with quantity <quantity>
+  Scenario Outline: Add Blue Top to the cart in the chosen quantity
     Given the shopper has an empty cart
     When the shopper adds "Blue Top" with a quantity of <quantity> and opens the cart
     Then the cart shows "Blue Top" with a quantity of <quantity>
