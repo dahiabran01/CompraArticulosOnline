@@ -24,6 +24,17 @@ public final class FailureDiagnosis {
     public record Diagnosis(String category, String probableCause, String whatToCheck, String detail) {}
 
     /**
+     * Diagnostico para cuando la tienda muestra su pagina de sobrecarga en lugar del contenido esperado.
+     */
+    public static Diagnosis siteUnavailable(String detail) {
+        return new Diagnosis(
+                "SITIO_NO_DISPONIBLE",
+                "El sitio publico respondio con sobrecarga temporal (heavy load / queue full)",
+                "Reintentar la ejecucion; es una saturacion temporal de automationexercise.com, no un defecto de la prueba",
+                detail == null ? "" : detail);
+    }
+
+    /**
      * Analiza la cadena de causas de una excepcion y devuelve el diagnostico segun prioridad fija.
      */
     public static Diagnosis of(Throwable error) {
@@ -46,11 +57,7 @@ public final class FailureDiagnosis {
         String detail = extractDetail(chain);
 
         if (isSiteOverloadedText(pageContext)) {
-            return new Diagnosis(
-                    "SITIO_NO_DISPONIBLE",
-                    "El sitio publico respondio con sobrecarga temporal (heavy load / queue full)",
-                    "Reintentar la ejecucion; es una saturacion temporal de automationexercise.com, no un defecto de la prueba",
-                    detail);
+            return siteUnavailable(detail);
         }
 
         for (Throwable cause : chain) {

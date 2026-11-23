@@ -279,6 +279,20 @@ public class FailureDiagnosisTest {
     }
 
     @Test
+    public void buildsSiteUnavailableDiagnosisFromOverloadNotice() {
+        // Arrange
+        String notice = "This website is under heavy load (queue full)";
+
+        // Act
+        Diagnosis diagnosis = FailureDiagnosis.siteUnavailable(notice);
+
+        // Assert
+        assertThat(diagnosis.category(), is(equalTo("SITIO_NO_DISPONIBLE")));
+        assertThat(diagnosis.whatToCheck(), containsString("Reintentar"));
+        assertThat(diagnosis.detail(), is(equalTo(notice)));
+    }
+
+    @Test
     public void keepsBusinessRuleDiagnosisWhenPageContextIsNormal() {
         // Arrange
         Throwable error = new CheckoutDataMismatch(
